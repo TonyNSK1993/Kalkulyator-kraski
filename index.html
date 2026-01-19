@@ -1165,7 +1165,6 @@
           <div class="calculator-tabs">
             <button class="calc-tab active" onclick="switchCalcTab('manual')">Ручной ввод</button>
             <button class="calc-tab" onclick="switchCalcTab('profiles')">Выбор профиля</button>
-            <button class="calc-tab" onclick="switchCalcTab('sheet')">Лист</button>
           </div>
 
           <div class="content-wrapper">
@@ -1181,21 +1180,23 @@
                   <input type="number" id="ptm" class="form-control" value="5.8" min="1.0" max="18.0" step="0.1">
                 </div>
 
-                <div class="input-group-row">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-ruler-vertical"></i>
-                      Длина, м
-                    </label>
-                    <input type="number" id="length" class="form-control" value="10" min="0.1" step="0.1">
-                  </div>
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-ruler-vertical"></i>
+                    Длина конструкций, м
+                  </label>
+                  <input type="number" id="length" class="form-control" value="10" min="0.1" step="0.1">
+                </div>
 
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-weight"></i>
-                      Вес, т
-                    </label>
-                    <input type="number" id="weight" class="form-control" value="1" min="0.01" step="0.01">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-ruler-combined"></i>
+                    Площадь поверхности, м²
+                  </label>
+                  <input type="number" id="area" class="form-control" placeholder="Введите площадь или оставьте для расчета">
+                  <div class="hint-box mt-10">
+                    <i class="fas fa-info-circle"></i>
+                    Если оставить пустым, площадь будет рассчитана автоматически по ПТМ и длине
                   </div>
                 </div>
               </div>
@@ -1237,35 +1238,24 @@
                   <div><strong>Выбранный размер:</strong> <span id="selected-size-name"></span></div>
                   <div><strong>ПТМ:</strong> <span id="selected-size-ptm"></span> мм</div>
                   <div><strong>Периметр:</strong> <span id="selected-size-perimeter"></span> мм</div>
-                  <div><strong>Площадь/1м:</strong> <span id="selected-size-areaPerMeter"></span> м²</div>
-                  <div><strong>Площадь/1т:</strong> <span id="selected-size-areaPerTon"></span> м²/т</div>
+                  <div><strong>Площадь на 1 м длины:</strong> <span id="selected-size-areaPerMeter"></span> м²/м.п.</div>
                 </div>
 
-                <!-- РУЧНОЙ ВВОД ТОЛЬКО ДЛИНЫ И ВЕСА -->
+                <!-- РУЧНОЙ ВВОД ТОЛЬКО ДЛИНЫ -->
                 <div class="hint-box mt-20">
                   <i class="fas fa-edit"></i>
-                  <strong>Ввод длины и веса</strong>
+                  <strong>Ввод длины профиля</strong>
                   <div style="margin-top: 10px; font-size: 13px;">
-                    Введите длину профиля и вес для расчета площади:
+                    Введите длину профиля для расчета общей площади:
                   </div>
                 </div>
 
-                <div class="input-group-row">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-ruler-vertical"></i>
-                      Длина, м
-                    </label>
-                    <input type="number" id="profile-length" class="form-control" value="10" min="0.1" step="0.1">
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-weight"></i>
-                      Вес, т
-                    </label>
-                    <input type="number" id="profile-weight" class="form-control" value="1" min="0.01" step="0.01">
-                  </div>
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-ruler-vertical"></i>
+                    Длина профиля, м
+                  </label>
+                  <input type="number" id="profile-length" class="form-control" value="10" min="0.1" step="0.1">
                 </div>
 
                 <div class="hint-box">
@@ -1277,32 +1267,6 @@
                     Уголок: ГОСТ 8509-93, 8510-86, DIN EN 10056-1-1998<br>
                     Профиль: ГОСТ 30245-2003, DIN EN 10210-2-2006, DIN EN 10219-2-2006
                   </div>
-                </div>
-              </div>
-
-              <!-- Лист -->
-              <div id="sheet" class="calc-content">
-                <div class="input-group-row">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-ruler"></i>
-                      Толщина листа, мм
-                    </label>
-                    <input type="number" id="sheetThickness" class="form-control" value="10.0" min="0.5" step="0.1">
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-weight"></i>
-                      Вес, кг
-                    </label>
-                    <input type="number" id="sheetWeight" class="form-control" value="100.0" min="1" step="0.1">
-                  </div>
-                </div>
-
-                <div class="hint-box">
-                  <i class="fas fa-info-circle"></i>
-                  <strong>Стандарты:</strong> ГОСТ 19904, ГОСТ 19903
                 </div>
               </div>
 
@@ -2186,127 +2150,76 @@
         name: 'Двутавр',
         sizes: [
           // ГОСТ Р 57837-2017 - Тип Б
-          { name: '10Б1', ptm: 2.582, perimeter: 399.782, areaPerMeter: 0.4, areaPerTon: 49.333, weightPerMeter: 8.1 },
-          { name: '12Б1', ptm: 2.339, perimeter: 471.582, areaPerMeter: 0.472, areaPerTon: 54.465, weightPerMeter: 8.66 },
-          { name: '12Б2', ptm: 2.78, perimeter: 475.182, areaPerMeter: 0.475, areaPerTon: 45.823, weightPerMeter: 10.37 },
-          { name: '14Б1', ptm: 2.447, perimeter: 547.182, areaPerMeter: 0.547, areaPerTon: 52.049, weightPerMeter: 10.51 },
-          { name: '14Б2', ptm: 2.983, perimeter: 550.582, areaPerMeter: 0.551, areaPerTon: 42.699, weightPerMeter: 12.9 },
-          { name: '16Б1', ptm: 2.616, perimeter: 618.549, areaPerMeter: 0.619, areaPerTon: 48.702, weightPerMeter: 12.7 },
-          { name: '16Б2', ptm: 3.227, perimeter: 622.549, areaPerMeter: 0.623, areaPerTon: 39.473, weightPerMeter: 15.77 },
-          { name: '18Б1', ptm: 2.821, perimeter: 693.949, areaPerMeter: 0.694, areaPerTon: 45.155, weightPerMeter: 15.37 },
-          { name: '18Б2', ptm: 3.431, perimeter: 697.949, areaPerMeter: 0.698, areaPerTon: 37.128, weightPerMeter: 18.8 },
-          { name: '20Б0', ptm: 3.033, perimeter: 764.115, areaPerMeter: 0.764, areaPerTon: 41.995, weightPerMeter: 18.2 },
-          { name: '20Б1', ptm: 3.527, perimeter: 770.115, areaPerMeter: 0.77, areaPerTon: 36.122, weightPerMeter: 21.33 },
-          { name: '20Б2', ptm: 4.137, perimeter: 778.115, areaPerMeter: 0.778, areaPerTon: 30.794, weightPerMeter: 25.27 },
-          { name: '20Б3', ptm: 5.099, perimeter: 789.115, areaPerMeter: 0.789, areaPerTon: 24.982, weightPerMeter: 31.59 },
-          { name: '25Б1', ptm: 3.399, perimeter: 961.398, areaPerMeter: 0.961, areaPerTon: 37.48, weightPerMeter: 25.65 },
-          { name: '25Б2', ptm: 3.893, perimeter: 967.398, areaPerMeter: 0.967, areaPerTon: 32.727, weightPerMeter: 29.56 },
-          { name: '25Б3', ptm: 4.867, perimeter: 978.398, areaPerMeter: 0.978, areaPerTon: 26.175, weightPerMeter: 37.38 },
-          { name: '25Б4', ptm: 5.829, perimeter: 989.398, areaPerMeter: 0.989, areaPerTon: 21.853, weightPerMeter: 45.28 },
-          { name: '30Б1', ptm: 3.521, perimeter: 1158.681, areaPerMeter: 1.159, areaPerTon: 36.177, weightPerMeter: 32.03 },
-          { name: '30Б2', ptm: 4.017, perimeter: 1164.681, areaPerMeter: 1.165, areaPerTon: 31.715, weightPerMeter: 36.72 },
-          { name: '30Б3', ptm: 4.996, perimeter: 1175.681, areaPerMeter: 1.176, areaPerTon: 25.497, weightPerMeter: 46.12 },
-          { name: '30Б4', ptm: 5.966, perimeter: 1186.681, areaPerMeter: 1.187, areaPerTon: 21.351, weightPerMeter: 55.57 },
-          { name: '35Б1', ptm: 3.897, perimeter: 1351.965, areaPerMeter: 1.352, areaPerTon: 32.691, weightPerMeter: 41.35 },
-          { name: '35Б2', ptm: 4.636, perimeter: 1361.965, areaPerMeter: 1.362, areaPerTon: 27.477, weightPerMeter: 49.57 },
-          { name: '35Б3', ptm: 5.614, perimeter: 1372.965, areaPerMeter: 1.373, areaPerTon: 22.69, weightPerMeter: 60.51 },
-          { name: '35Б4', ptm: 6.702, perimeter: 1385.965, areaPerMeter: 1.386, areaPerTon: 19.006, weightPerMeter: 72.93 },
-          { name: '40Б1', ptm: 4.666, perimeter: 1546.531, areaPerMeter: 1.547, areaPerTon: 27.303, weightPerMeter: 56.64 },
-          { name: '40Б2', ptm: 5.404, perimeter: 1556.531, areaPerMeter: 1.557, areaPerTon: 23.572, weightPerMeter: 66.03 },
-          { name: '40Б3', ptm: 6.502, perimeter: 1569.531, areaPerMeter: 1.57, areaPerTon: 19.593, weightPerMeter: 80.11 },
-          { name: '40Б4', ptm: 7.589, perimeter: 1582.531, areaPerMeter: 1.583, areaPerTon: 16.786, weightPerMeter: 94.26 },
-          { name: '45Б1', ptm: 5.137, perimeter: 1641.097, areaPerMeter: 1.641, areaPerTon: 24.799, weightPerMeter: 66.18 },
-          { name: '45Б2', ptm: 5.86, perimeter: 1651.097, areaPerMeter: 1.651, areaPerTon: 21.737, weightPerMeter: 75.96 },
-          { name: '45БЗ', ptm: 6.937, perimeter: 1664.097, areaPerMeter: 1.664, areaPerTon: 18.365, weightPerMeter: 90.61 },
-          { name: '45Б4', ptm: 8.003, perimeter: 1677.097, areaPerMeter: 1.677, areaPerTon: 15.917, weightPerMeter: 105.36 },
+          { name: '10Б1', ptm: 2.582, perimeter: 399.782, areaPerMeter: 0.4 },
+          { name: '12Б1', ptm: 2.339, perimeter: 471.582, areaPerMeter: 0.472 },
+          { name: '12Б2', ptm: 2.78, perimeter: 475.182, areaPerMeter: 0.475 },
+          { name: '14Б1', ptm: 2.447, perimeter: 547.182, areaPerMeter: 0.547 },
+          { name: '14Б2', ptm: 2.983, perimeter: 550.582, areaPerMeter: 0.551 },
+          { name: '16Б1', ptm: 2.616, perimeter: 618.549, areaPerMeter: 0.619 },
+          { name: '16Б2', ptm: 3.227, perimeter: 622.549, areaPerMeter: 0.623 },
+          { name: '18Б1', ptm: 2.821, perimeter: 693.949, areaPerMeter: 0.694 },
+          { name: '18Б2', ptm: 3.431, perimeter: 697.949, areaPerMeter: 0.698 },
+          { name: '20Б0', ptm: 3.033, perimeter: 764.115, areaPerMeter: 0.764 },
+          { name: '20Б1', ptm: 3.527, perimeter: 770.115, areaPerMeter: 0.77 },
+          { name: '20Б2', ptm: 4.137, perimeter: 778.115, areaPerMeter: 0.778 },
+          { name: '20Б3', ptm: 5.099, perimeter: 789.115, areaPerMeter: 0.789 },
+          { name: '25Б1', ptm: 3.399, perimeter: 961.398, areaPerMeter: 0.961 },
+          { name: '25Б2', ptm: 3.893, perimeter: 967.398, areaPerMeter: 0.967 },
+          { name: '25Б3', ptm: 4.867, perimeter: 978.398, areaPerMeter: 0.978 },
+          { name: '25Б4', ptm: 5.829, perimeter: 989.398, areaPerMeter: 0.989 },
+          { name: '30Б1', ptm: 3.521, perimeter: 1158.681, areaPerMeter: 1.159 },
+          { name: '30Б2', ptm: 4.017, perimeter: 1164.681, areaPerMeter: 1.165 },
+          { name: '30Б3', ptm: 4.996, perimeter: 1175.681, areaPerMeter: 1.176 },
+          { name: '30Б4', ptm: 5.966, perimeter: 1186.681, areaPerMeter: 1.187 },
+          { name: '35Б1', ptm: 3.897, perimeter: 1351.965, areaPerMeter: 1.352 },
+          { name: '35Б2', ptm: 4.636, perimeter: 1361.965, areaPerMeter: 1.362 },
+          { name: '35Б3', ptm: 5.614, perimeter: 1372.965, areaPerMeter: 1.373 },
+          { name: '35Б4', ptm: 6.702, perimeter: 1385.965, areaPerMeter: 1.386 },
+          { name: '40Б1', ptm: 4.666, perimeter: 1546.531, areaPerMeter: 1.547 },
+          { name: '40Б2', ptm: 5.404, perimeter: 1556.531, areaPerMeter: 1.557 },
+          { name: '40Б3', ptm: 6.502, perimeter: 1569.531, areaPerMeter: 1.57 },
+          { name: '40Б4', ptm: 7.589, perimeter: 1582.531, areaPerMeter: 1.583 },
+          { name: '45Б1', ptm: 5.137, perimeter: 1641.097, areaPerMeter: 1.641 },
+          { name: '45Б2', ptm: 5.86, perimeter: 1651.097, areaPerMeter: 1.651 },
+          { name: '45БЗ', ptm: 6.937, perimeter: 1664.097, areaPerMeter: 1.664 },
+          { name: '45Б4', ptm: 8.003, perimeter: 1677.097, areaPerMeter: 1.677 },
           
           // ГОСТ Р 57837-2017 - Тип Ш
-          { name: '20Ш0', ptm: 3.297, perimeter: 943.681, areaPerMeter: 0.944, areaPerTon: 38.641, weightPerMeter: 24.42 },
-          { name: '20Ш1', ptm: 4.091, perimeter: 953.681, areaPerMeter: 0.954, areaPerTon: 31.142, weightPerMeter: 30.63 },
-          { name: '20Ш2', ptm: 5.119, perimeter: 964.681, areaPerMeter: 0.965, areaPerTon: 24.886, weightPerMeter: 38.77 },
-          { name: '20Ш3', ptm: 6.134, perimeter: 975.681, areaPerMeter: 0.976, areaPerTon: 20.767, weightPerMeter: 46.98 },
-          { name: '20Ш4', ptm: 7.524, perimeter: 997.681, areaPerMeter: 0.998, areaPerTon: 16.932, weightPerMeter: 58.92 },
-          { name: '20Ш5', ptm: 8.888, perimeter: 1015.681, areaPerMeter: 1.016, areaPerTon: 14.333, weightPerMeter: 70.87 },
-          { name: '20Ш6', ptm: 10.821, perimeter: 1037.681, areaPerMeter: 1.038, areaPerTon: 11.772, weightPerMeter: 88.15 },
-          { name: '25Ш0', ptm: 4.121, perimeter: 1136.531, areaPerMeter: 1.137, areaPerTon: 30.911, weightPerMeter: 36.77 },
-          { name: '25Ш1', ptm: 4.905, perimeter: 1146.531, areaPerMeter: 1.147, areaPerTon: 25.971, weightPerMeter: 44.16 },
-          { name: '25Ш2', ptm: 5.925, perimeter: 1157.531, areaPerMeter: 1.158, areaPerTon: 21.499, weightPerMeter: 53.85 },
-          { name: '25Ш3', ptm: 7.314, perimeter: 1171.531, areaPerMeter: 1.172, areaPerTon: 17.417, weightPerMeter: 67.27 },
-          { name: '25Ш4', ptm: 8.939, perimeter: 1202.531, areaPerMeter: 1.203, areaPerTon: 14.25, weightPerMeter: 84.39 },
-          { name: '30Ш0', ptm: 4.619, perimeter: 1331.097, areaPerMeter: 1.331, areaPerTon: 27.58, weightPerMeter: 48.27 },
-          { name: '35Ш1', ptm: 5.154, perimeter: 1613.664, areaPerMeter: 1.614, areaPerTon: 24.715, weightPerMeter: 65.3 },
-          { name: '40Ш1', ptm: 5.927, perimeter: 1905.23, areaPerMeter: 1.905, areaPerTon: 21.494, weightPerMeter: 88.64 },
-          { name: '45Ш0', ptm: 6.743, perimeter: 2002.796, areaPerMeter: 2.003, areaPerTon: 18.893, weightPerMeter: 106.0 },
-          { name: '50Ш1', ptm: 6.938, perimeter: 2097.363, areaPerMeter: 2.097, areaPerTon: 18.36, weightPerMeter: 114.24 },
-          { name: '60Ш1', ptm: 7.613, perimeter: 2291.929, areaPerMeter: 2.292, areaPerTon: 16.733, weightPerMeter: 136.98 },
-          { name: '70Ш1', ptm: 8.426, perimeter: 2509.929, areaPerMeter: 2.51, areaPerTon: 15.118, weightPerMeter: 166.02 },
+          { name: '20Ш0', ptm: 3.297, perimeter: 943.681, areaPerMeter: 0.944 },
+          { name: '20Ш1', ptm: 4.091, perimeter: 953.681, areaPerMeter: 0.954 },
+          { name: '20Ш2', ptm: 5.119, perimeter: 964.681, areaPerMeter: 0.965 },
+          { name: '20Ш3', ptm: 6.134, perimeter: 975.681, areaPerMeter: 0.976 },
+          { name: '20Ш4', ptm: 7.524, perimeter: 997.681, areaPerMeter: 0.998 },
+          { name: '20Ш5', ptm: 8.888, perimeter: 1015.681, areaPerMeter: 1.016 },
+          { name: '20Ш6', ptm: 10.821, perimeter: 1037.681, areaPerMeter: 1.038 },
+          { name: '25Ш0', ptm: 4.121, perimeter: 1136.531, areaPerMeter: 1.137 },
+          { name: '25Ш1', ptm: 4.905, perimeter: 1146.531, areaPerMeter: 1.147 },
+          { name: '25Ш2', ptm: 5.925, perimeter: 1157.531, areaPerMeter: 1.158 },
+          { name: '25Ш3', ptm: 7.314, perimeter: 1171.531, areaPerMeter: 1.172 },
+          { name: '25Ш4', ptm: 8.939, perimeter: 1202.531, areaPerMeter: 1.203 },
+          { name: '30Ш0', ptm: 4.619, perimeter: 1331.097, areaPerMeter: 1.331 },
+          { name: '35Ш1', ptm: 5.154, perimeter: 1613.664, areaPerMeter: 1.614 },
+          { name: '40Ш1', ptm: 5.927, perimeter: 1905.23, areaPerMeter: 1.905 },
+          { name: '45Ш0', ptm: 6.743, perimeter: 2002.796, areaPerMeter: 2.003 },
+          { name: '50Ш1', ptm: 6.938, perimeter: 2097.363, areaPerMeter: 2.097 },
+          { name: '60Ш1', ptm: 7.613, perimeter: 2291.929, areaPerMeter: 2.292 },
+          { name: '70Ш1', ptm: 8.426, perimeter: 2509.929, areaPerMeter: 2.51 },
           
           // ГОСТ Р 57837-2017 - Тип К
-          { name: '15К1', ptm: 3.977, perimeter: 859.115, areaPerMeter: 0.859, areaPerTon: 32.03, weightPerMeter: 26.82 },
-          { name: '20К1', ptm: 4.571, perimeter: 1152.681, areaPerMeter: 1.153, areaPerTon: 27.868, weightPerMeter: 41.37 },
-          { name: '25К1', ptm: 5.519, perimeter: 1444.531, areaPerMeter: 1.445, areaPerTon: 23.084, weightPerMeter: 62.58 },
-          { name: '30К1', ptm: 6.357, perimeter: 1743.097, areaPerMeter: 1.743, areaPerTon: 20.04, weightPerMeter: 86.98 },
-          { name: '35К1', ptm: 6.877, perimeter: 2021.664, areaPerMeter: 2.022, areaPerTon: 18.523, weightPerMeter: 109.14 },
-          { name: '40К1', ptm: 8.052, perimeter: 2320.23, areaPerMeter: 2.32, areaPerTon: 15.822, weightPerMeter: 146.65 },
+          { name: '15К1', ptm: 3.977, perimeter: 859.115, areaPerMeter: 0.859 },
+          { name: '20К1', ptm: 4.571, perimeter: 1152.681, areaPerMeter: 1.153 },
+          { name: '25К1', ptm: 5.519, perimeter: 1444.531, areaPerMeter: 1.445 },
+          { name: '30К1', ptm: 6.357, perimeter: 1743.097, areaPerMeter: 1.743 },
+          { name: '35К1', ptm: 6.877, perimeter: 2021.664, areaPerMeter: 2.022 },
+          { name: '40К1', ptm: 8.052, perimeter: 2320.23, areaPerMeter: 2.32 },
           
           // ГОСТ Р 57837-2017 - Тип С
-          { name: '13С1', ptm: 4.702, perimeter: 670.398, areaPerMeter: 0.67, areaPerTon: 27.093, weightPerMeter: 24.75 },
-          { name: '20С1', ptm: 6.115, perimeter: 1169.681, areaPerMeter: 1.17, areaPerTon: 20.831, weightPerMeter: 56.15 },
-          { name: '25С1', ptm: 5.673, perimeter: 1446.531, areaPerMeter: 1.447, areaPerTon: 22.456, weightPerMeter: 64.42 },
-          { name: '30С1', ptm: 6.184, perimeter: 1741.097, areaPerMeter: 1.741, areaPerTon: 20.601, weightPerMeter: 84.51 },
-          { name: '35С1', ptm: 6.697, perimeter: 2019.664, areaPerMeter: 2.02, areaPerTon: 19.022, weightPerMeter: 106.18 },
-          { name: '40С1', ptm: 11.439, perimeter: 1560.115, areaPerMeter: 1.56, areaPerTon: 11.137, weightPerMeter: 140.09 },
-          
-          // СТО АСЧМ 20-93 - Нормальные двутавры
-          { name: '10Б1 (СТО)', ptm: 2.582, perimeter: 399.782, areaPerMeter: 0.4, areaPerTon: 49.333, weightPerMeter: 8.1 },
-          { name: '12Б1 (СТО)', ptm: 2.339, perimeter: 471.582, areaPerMeter: 0.472, areaPerTon: 54.465, weightPerMeter: 8.66 },
-          { name: '14Б1 (СТО)', ptm: 2.447, perimeter: 547.182, areaPerMeter: 0.547, areaPerTon: 52.049, weightPerMeter: 10.51 },
-          { name: '18Б1 (СТО)', ptm: 2.821, perimeter: 693.949, areaPerMeter: 0.694, areaPerTon: 45.155, weightPerMeter: 15.37 },
-          { name: '20Б1 (СТО)', ptm: 3.527, perimeter: 770.115, areaPerMeter: 0.77, areaPerTon: 36.122, weightPerMeter: 21.33 },
-          { name: '30Б1 (СТО)', ptm: 3.521, perimeter: 1158.681, areaPerMeter: 1.159, areaPerTon: 36.177, weightPerMeter: 32.03 },
-          { name: '40Б1 (СТО)', ptm: 4.666, perimeter: 1546.531, areaPerMeter: 1.547, areaPerTon: 27.303, weightPerMeter: 56.64 },
-          { name: '45Б1 (СТО)', ptm: 5.137, perimeter: 1641.097, areaPerMeter: 1.641, areaPerTon: 24.799, weightPerMeter: 66.18 },
-          { name: '50Б1 (СТО)', ptm: 5.346, perimeter: 1728.064, areaPerMeter: 1.728, areaPerTon: 23.83, weightPerMeter: 72.52 },
-          { name: '55Б1 (СТО)', ptm: 5.948, perimeter: 1905.796, areaPerMeter: 1.906, areaPerTon: 21.416, weightPerMeter: 89.0 },
-          { name: '60Б1 (СТО)', ptm: 6.24, perimeter: 1930.23, areaPerMeter: 1.93, areaPerTon: 20.413, weightPerMeter: 94.56 },
-          { name: '70Б0 (СТО)', ptm: 6.829, perimeter: 2241.196, areaPerMeter: 2.241, areaPerTon: 18.654, weightPerMeter: 120.14 },
-          
-          // СТО АСЧМ 20-93 - Широкополочные двутавры
-          { name: '20Ш1 (СТО)', ptm: 4.091, perimeter: 953.681, areaPerMeter: 0.954, areaPerTon: 31.142, weightPerMeter: 30.63 },
-          { name: '30Ш2 (СТО)', ptm: 6.448, perimeter: 1355.097, areaPerMeter: 1.355, areaPerTon: 19.755, weightPerMeter: 68.6 },
-          { name: '40Ш1 (СТО)', ptm: 5.927, perimeter: 1905.23, areaPerMeter: 1.905, areaPerTon: 21.494, weightPerMeter: 88.64 },
-          { name: '50Ш1 (СТО)', ptm: 6.938, perimeter: 2097.363, areaPerMeter: 2.097, areaPerTon: 18.36, weightPerMeter: 114.24 },
-          { name: '60Ш1 (СТО)', ptm: 7.613, perimeter: 2291.929, areaPerMeter: 2.292, areaPerTon: 16.733, weightPerMeter: 136.98 },
-          { name: '70Ш1 (СТО)', ptm: 8.426, perimeter: 2509.929, areaPerMeter: 2.51, areaPerTon: 15.118, weightPerMeter: 166.02 },
-          { name: '80Ш1 (СТО)', ptm: 7.799, perimeter: 2688.929, areaPerMeter: 2.689, areaPerTon: 16.334, weightPerMeter: 164.62 },
-          { name: '90Ш1 (СТО)', ptm: 8.471, perimeter: 2879.929, areaPerMeter: 2.88, areaPerTon: 15.038, weightPerMeter: 191.51 },
-          { name: '100Ш1 (СТО)', ptm: 9.249, perimeter: 3176.496, areaPerMeter: 3.176, areaPerTon: 13.773, weightPerMeter: 230.62 },
-          
-          // СТО АСЧМ 20-93 - Колонные двутавры
-          { name: '20К1 (СТО)', ptm: 4.571, perimeter: 1152.681, areaPerMeter: 1.153, areaPerTon: 27.868, weightPerMeter: 41.37 },
-          { name: '25К1 (СТО)', ptm: 5.519, perimeter: 1444.531, areaPerMeter: 1.445, areaPerTon: 23.084, weightPerMeter: 62.58 },
-          { name: '30К1 (СТО)', ptm: 6.357, perimeter: 1743.097, areaPerMeter: 1.743, areaPerTon: 20.04, weightPerMeter: 86.98 },
-          { name: '35К1 (СТО)', ptm: 6.877, perimeter: 2021.664, areaPerMeter: 2.022, areaPerTon: 18.523, weightPerMeter: 109.14 },
-          { name: '40К1 (СТО)', ptm: 8.052, perimeter: 2320.23, areaPerMeter: 2.32, areaPerTon: 15.822, weightPerMeter: 146.65 },
-          
-          // DIN 1025
-          { name: 'I-80 DIN', ptm: 2.502, perimeter: 302.642, areaPerMeter: 0.303, areaPerTon: 50.91, weightPerMeter: 5.94 },
-          { name: 'I-100 DIN', ptm: 2.869, perimeter: 370.283, areaPerMeter: 0.37, areaPerTon: 44.397, weightPerMeter: 8.34 },
-          { name: 'I-160 DIN', ptm: 3.977, perimeter: 573.329, areaPerMeter: 0.573, areaPerTon: 32.033, weightPerMeter: 17.9 },
-          { name: 'I-200 DIN', ptm: 4.717, perimeter: 708.735, areaPerMeter: 0.709, areaPerTon: 27.004, weightPerMeter: 26.24 },
-          { name: 'I-300 DIN', ptm: 6.716, perimeter: 1027.351, areaPerMeter: 1.027, areaPerTon: 18.968, weightPerMeter: 54.17 },
-          { name: 'I-400 DIN', ptm: 8.878, perimeter: 1326.256, areaPerMeter: 1.326, areaPerTon: 14.349, weightPerMeter: 92.42 },
-          { name: 'I-500 DIN', ptm: 11.037, perimeter: 1625.038, areaPerMeter: 1.625, areaPerTon: 11.542, weightPerMeter: 140.79 },
-          
-          // DIN 1025-2-1995 IPB
-          { name: 'IPB-100', ptm: 4.589, perimeter: 567.398, areaPerMeter: 0.567, areaPerTon: 27.761, weightPerMeter: 20.44 },
-          { name: 'IPB-200', ptm: 6.783, perimeter: 1151.097, areaPerMeter: 1.151, areaPerTon: 18.78, weightPerMeter: 61.29 },
-          { name: 'IPB-300', ptm: 8.609, perimeter: 1731.646, areaPerMeter: 1.732, areaPerTon: 14.797, weightPerMeter: 117.03 },
-          { name: 'IPB-400', ptm: 10.265, perimeter: 1926.646, areaPerMeter: 1.927, areaPerTon: 12.41, weightPerMeter: 155.26 },
-          { name: 'IPB-500', ptm: 11.232, perimeter: 2124.646, areaPerMeter: 2.125, areaPerTon: 11.342, weightPerMeter: 187.33 },
-          { name: 'IPB-600', ptm: 11.623, perimeter: 2322.646, areaPerMeter: 2.323, areaPerTon: 10.96, weightPerMeter: 211.91 },
-          { name: 'IPB-700', ptm: 12.16, perimeter: 2519.646, areaPerMeter: 2.52, areaPerTon: 10.476, weightPerMeter: 240.48 },
-          { name: 'IPB-1000', ptm: 12.861, perimeter: 3110.496, areaPerMeter: 3.11, areaPerTon: 9.905, weightPerMeter: 314.04 }
+          { name: '13С1', ptm: 4.702, perimeter: 670.398, areaPerMeter: 0.67 },
+          { name: '20С1', ptm: 6.115, perimeter: 1169.681, areaPerMeter: 1.17 },
+          { name: '25С1', ptm: 5.673, perimeter: 1446.531, areaPerMeter: 1.447 },
+          { name: '30С1', ptm: 6.184, perimeter: 1741.097, areaPerMeter: 1.741 },
+          { name: '35С1', ptm: 6.697, perimeter: 2019.664, areaPerMeter: 2.02 },
+          { name: '40С1', ptm: 11.439, perimeter: 1560.115, areaPerMeter: 1.56 }
         ]
       },
       
@@ -2314,27 +2227,27 @@
         name: 'Швеллер',
         sizes: [
           // ГОСТ 8240-97
-          { name: '5У', ptm: 2.949, perimeter: 209.283, areaPerMeter: 0.209, areaPerTon: 43.194, weightPerMeter: 4.84 },
-          { name: '10У', ptm: 3.025, perimeter: 362.113, areaPerMeter: 0.362, areaPerTon: 42.113, weightPerMeter: 8.59 },
-          { name: '20У', ptm: 3.473, perimeter: 674.207, areaPerMeter: 0.674, areaPerTon: 36.681, weightPerMeter: 18.4 },
-          { name: '30У', ptm: 4.21, perimeter: 961.992, areaPerMeter: 0.962, areaPerTon: 30.256, weightPerMeter: 31.8 },
-          { name: '40У', ptm: 5.071, perimeter: 1214.256, areaPerMeter: 1.214, areaPerTon: 25.12, weightPerMeter: 48.34 },
+          { name: '5У', ptm: 2.949, perimeter: 209.283, areaPerMeter: 0.209 },
+          { name: '10У', ptm: 3.025, perimeter: 362.113, areaPerMeter: 0.362 },
+          { name: '20У', ptm: 3.473, perimeter: 674.207, areaPerMeter: 0.674 },
+          { name: '30У', ptm: 4.21, perimeter: 961.992, areaPerMeter: 0.962 },
+          { name: '40У', ptm: 5.071, perimeter: 1214.256, areaPerMeter: 1.214 },
           
           // DIN 1026 UPN
-          { name: 'UPN-30x15', ptm: 2.093, perimeter: 105.69, areaPerMeter: 0.106, areaPerTon: 60.851, weightPerMeter: 1.74 },
-          { name: 'UPN-40x20', ptm: 2.569, perimeter: 142.364, areaPerMeter: 0.142, areaPerTon: 49.596, weightPerMeter: 2.87 },
-          { name: 'UPN-50', ptm: 3.102, perimeter: 229.467, areaPerMeter: 0.229, areaPerTon: 41.063, weightPerMeter: 5.59 },
-          { name: 'UPN-100', ptm: 3.617, perimeter: 372, areaPerMeter: 0.372, areaPerTon: 35.224, weightPerMeter: 10.56 },
-          { name: 'UPN-200', ptm: 4.874, perimeter: 660.345, areaPerMeter: 0.66, areaPerTon: 26.137, weightPerMeter: 25.26 },
-          { name: 'UPN-300', ptm: 6.191, perimeter: 949.115, areaPerMeter: 0.949, areaPerTon: 20.575, weightPerMeter: 46.14 },
-          { name: 'UPN-400', ptm: 7.683, perimeter: 1182.03, areaPerMeter: 1.182, areaPerTon: 16.581, weightPerMeter: 71.28 },
+          { name: 'UPN-30x15', ptm: 2.093, perimeter: 105.69, areaPerMeter: 0.106 },
+          { name: 'UPN-40x20', ptm: 2.569, perimeter: 142.364, areaPerMeter: 0.142 },
+          { name: 'UPN-50', ptm: 3.102, perimeter: 229.467, areaPerMeter: 0.229 },
+          { name: 'UPN-100', ptm: 3.617, perimeter: 372, areaPerMeter: 0.372 },
+          { name: 'UPN-200', ptm: 4.874, perimeter: 660.345, areaPerMeter: 0.66 },
+          { name: 'UPN-300', ptm: 6.191, perimeter: 949.115, areaPerMeter: 0.949 },
+          { name: 'UPN-400', ptm: 7.683, perimeter: 1182.03, areaPerMeter: 1.182 },
           
           // DIN 1026-2-2002 UPE
-          { name: 'UPE-80', ptm: 2.932, perimeter: 343.416, areaPerMeter: 0.343, areaPerTon: 43.447, weightPerMeter: 7.9 },
-          { name: 'UPE-140', ptm: 3.544, perimeter: 519.699, areaPerMeter: 0.52, areaPerTon: 35.945, weightPerMeter: 14.46 },
-          { name: 'UPE-200', ptm: 4.162, perimeter: 696.841, areaPerMeter: 0.697, areaPerTon: 30.605, weightPerMeter: 22.77 },
-          { name: 'UPE-300', ptm: 5.848, perimeter: 968.124, areaPerMeter: 0.968, areaPerTon: 21.783, weightPerMeter: 44.44 },
-          { name: 'UPE-400', ptm: 7.55, perimeter: 1217.549, areaPerMeter: 1.218, areaPerTon: 16.872, weightPerMeter: 72.17 }
+          { name: 'UPE-80', ptm: 2.932, perimeter: 343.416, areaPerMeter: 0.343 },
+          { name: 'UPE-140', ptm: 3.544, perimeter: 519.699, areaPerMeter: 0.52 },
+          { name: 'UPE-200', ptm: 4.162, perimeter: 696.841, areaPerMeter: 0.697 },
+          { name: 'UPE-300', ptm: 5.848, perimeter: 968.124, areaPerMeter: 0.968 },
+          { name: 'UPE-400', ptm: 7.55, perimeter: 1217.549, areaPerMeter: 1.218 }
         ]
       },
       
@@ -2342,13 +2255,13 @@
         name: 'Профиль',
         sizes: [
           // ГОСТ 30245-2003 квадратные и прямоугольные
-          { name: '40 x 40 x 2', ptm: 1.918, perimeter: 153.133, areaPerMeter: 0.153, areaPerTon: 66.42, weightPerMeter: 2.31 },
-          { name: '50 x 50 x 4', ptm: 3.73, perimeter: 186.265, areaPerMeter: 0.186, areaPerTon: 34.151, weightPerMeter: 5.45 },
-          { name: '100 x 50 x 5', ptm: 4.722, perimeter: 282.832, areaPerMeter: 0.283, areaPerTon: 26.976, weightPerMeter: 10.48 },
-          { name: '150 x 150 x 5', ptm: 4.865, perimeter: 582.832, areaPerMeter: 0.583, areaPerTon: 26.183, weightPerMeter: 22.26 },
-          { name: '200 x 200 x 10', ptm: 9.585, perimeter: 757.08, areaPerMeter: 0.757, areaPerTon: 13.29, weightPerMeter: 56.94 },
-          { name: '300 x 200 x 10', ptm: 9.672, perimeter: 957.08, areaPerMeter: 0.957, areaPerTon: 13.171, weightPerMeter: 72.66 },
-          { name: '400 x 200 x 10', ptm: 9.728, perimeter: 1157.08, areaPerMeter: 1.157, areaPerTon: 13.094, weightPerMeter: 88.38 }
+          { name: '40 x 40 x 2', ptm: 1.918, perimeter: 153.133, areaPerMeter: 0.153 },
+          { name: '50 x 50 x 4', ptm: 3.73, perimeter: 186.265, areaPerMeter: 0.186 },
+          { name: '100 x 50 x 5', ptm: 4.722, perimeter: 282.832, areaPerMeter: 0.283 },
+          { name: '150 x 150 x 5', ptm: 4.865, perimeter: 582.832, areaPerMeter: 0.583 },
+          { name: '200 x 200 x 10', ptm: 9.585, perimeter: 757.08, areaPerMeter: 0.757 },
+          { name: '300 x 200 x 10', ptm: 9.672, perimeter: 957.08, areaPerMeter: 0.957 },
+          { name: '400 x 200 x 10', ptm: 9.728, perimeter: 1157.08, areaPerMeter: 1.157 }
         ]
       },
       
@@ -2356,17 +2269,17 @@
         name: 'Труба',
         sizes: [
           // Трубы по размерам (примерные значения)
-          { name: 'Ø25×2', ptm: 2.0, perimeter: 79, areaPerMeter: 0.079, areaPerTon: 69.91, weightPerMeter: 1.13 },
-          { name: 'Ø32×2.5', ptm: 2.5, perimeter: 101, areaPerMeter: 0.101, areaPerTon: 55.49, weightPerMeter: 1.82 },
-          { name: 'Ø48×3', ptm: 3.0, perimeter: 151, areaPerMeter: 0.151, areaPerTon: 45.35, weightPerMeter: 3.33 },
-          { name: 'Ø57×3', ptm: 3.0, perimeter: 179, areaPerMeter: 0.179, areaPerTon: 44.75, weightPerMeter: 4.0 },
-          { name: 'Ø76×3', ptm: 3.0, perimeter: 239, areaPerMeter: 0.239, areaPerTon: 44.26, weightPerMeter: 5.4 },
-          { name: 'Ø89×4', ptm: 4.0, perimeter: 280, areaPerMeter: 0.28, areaPerTon: 33.33, weightPerMeter: 8.4 },
-          { name: 'Ø108×4', ptm: 4.0, perimeter: 340, areaPerMeter: 0.34, areaPerTon: 33.01, weightPerMeter: 10.3 },
-          { name: 'Ø133×5', ptm: 5.0, perimeter: 418, areaPerMeter: 0.42, areaPerTon: 26.58, weightPerMeter: 15.8 },
-          { name: 'Ø159×6', ptm: 6.0, perimeter: 500, areaPerMeter: 0.5, areaPerTon: 22.12, weightPerMeter: 22.6 },
-          { name: 'Ø219×8', ptm: 8.0, perimeter: 688, areaPerMeter: 0.69, areaPerTon: 16.59, weightPerMeter: 41.6 },
-          { name: 'Ø273×10', ptm: 10.0, perimeter: 858, areaPerMeter: 0.86, areaPerTon: 13.25, weightPerMeter: 64.9 }
+          { name: 'Ø25×2', ptm: 2.0, perimeter: 79, areaPerMeter: 0.079 },
+          { name: 'Ø32×2.5', ptm: 2.5, perimeter: 101, areaPerMeter: 0.101 },
+          { name: 'Ø48×3', ptm: 3.0, perimeter: 151, areaPerMeter: 0.151 },
+          { name: 'Ø57×3', ptm: 3.0, perimeter: 179, areaPerMeter: 0.179 },
+          { name: 'Ø76×3', ptm: 3.0, perimeter: 239, areaPerMeter: 0.239 },
+          { name: 'Ø89×4', ptm: 4.0, perimeter: 280, areaPerMeter: 0.28 },
+          { name: 'Ø108×4', ptm: 4.0, perimeter: 340, areaPerMeter: 0.34 },
+          { name: 'Ø133×5', ptm: 5.0, perimeter: 418, areaPerMeter: 0.42 },
+          { name: 'Ø159×6', ptm: 6.0, perimeter: 500, areaPerMeter: 0.5 },
+          { name: 'Ø219×8', ptm: 8.0, perimeter: 688, areaPerMeter: 0.69 },
+          { name: 'Ø273×10', ptm: 10.0, perimeter: 858, areaPerMeter: 0.86 }
         ]
       },
       
@@ -2374,13 +2287,13 @@
         name: 'Уголок',
         sizes: [
           // ГОСТ 8509-93 и ГОСТ 8510-86
-          { name: '20 x 20 x 3', ptm: 1.459, perimeter: 77.468, areaPerMeter: 0.077, areaPerTon: 87.323, weightPerMeter: 0.887 },
-          { name: '30 x 30 x 4', ptm: 1.935, perimeter: 117.167, areaPerMeter: 0.117, areaPerTon: 65.837, weightPerMeter: 1.78 },
-          { name: '40 x 40 x 5', ptm: 2.424, perimeter: 156.395, areaPerMeter: 0.156, areaPerTon: 52.55, weightPerMeter: 2.98 },
-          { name: '50 x 50 x 6', ptm: 2.902, perimeter: 196.094, areaPerMeter: 0.196, areaPerTon: 43.894, weightPerMeter: 4.47 },
-          { name: '70 x 70 x 8', ptm: 3.889, perimeter: 274.249, areaPerMeter: 0.274, areaPerTon: 32.755, weightPerMeter: 8.37 },
-          { name: '100 x 100 x 16', ptm: 7.583, perimeter: 391.416, areaPerMeter: 0.391, areaPerTon: 16.8, weightPerMeter: 23.3 },
-          { name: '200 x 200 x 30', ptm: 14.171, perimeter: 787.124, areaPerMeter: 0.787, areaPerTon: 8.99, weightPerMeter: 87.56 }
+          { name: '20 x 20 x 3', ptm: 1.459, perimeter: 77.468, areaPerMeter: 0.077 },
+          { name: '30 x 30 x 4', ptm: 1.935, perimeter: 117.167, areaPerMeter: 0.117 },
+          { name: '40 x 40 x 5', ptm: 2.424, perimeter: 156.395, areaPerMeter: 0.156 },
+          { name: '50 x 50 x 6', ptm: 2.902, perimeter: 196.094, areaPerMeter: 0.196 },
+          { name: '70 x 70 x 8', ptm: 3.889, perimeter: 274.249, areaPerMeter: 0.274 },
+          { name: '100 x 100 x 16', ptm: 7.583, perimeter: 391.416, areaPerMeter: 0.391 },
+          { name: '200 x 200 x 30', ptm: 14.171, perimeter: 787.124, areaPerMeter: 0.787 }
         ]
       }
     };
@@ -2457,7 +2370,7 @@
       { ptm: 4.0, R90: { konstruktiv: 3.75, vm: 0.85, total: 4.60 }, R120: { konstruktiv: 4.20, vm: 1.90, total: 6.10 }},
       { ptm: 4.1, R90: { konstruktiv: 3.69, vm: 0.82, total: 4.52 }, R120: { konstruktiv: 4.12, vm: 1.85, total: 5.97 }},
       { ptm: 4.2, R90: { konstruktiv: 3.63, vm: 0.80, total: 4.43 }, R120: { konstruktiv: 4.03, vm: 1.80, total: 5.83 }},
-      { ptm: 4.3, R90: { konstruktiv: 3.58, vm: 0.77, total: 4.35 }, R120: { konstruktiv: 3.95, vm: 1.75, total: 5.70 }},
+      { ptm: 4.3, R90: { konstruktiv: 3.58, vm: 0.77, total: 4.35 }, R120: { konstruktiv: 4.05, vm: 1.75, total: 5.70 }},
       { ptm: 4.4, R90: { konstruktiv: 3.52, vm: 0.75, total: 4.27 }, R120: { konstruktiv: 3.87, vm: 1.70, total: 5.57 }},
       { ptm: 4.5, R90: { konstruktiv: 3.46, vm: 0.72, total: 4.18 }, R120: { konstruktiv: 3.78, vm: 1.65, total: 5.43 }},
       { ptm: 4.6, R90: { konstruktiv: 3.40, vm: 0.70, total: 4.10 }, R120: { konstruktiv: 3.70, vm: 1.60, total: 5.30 }},
@@ -2527,7 +2440,6 @@
     let currentProduct = "vm";
     let currentSurface = "clean_metal";
     let currentTimerProduct = "vm";
-    let currentCalcProduct = "vm";
 
     const SURFACE_LABELS = {
       clean_metal: "Чистый металл",
@@ -2605,7 +2517,7 @@
         
         let displayText = size.name;
         if (size.ptm) displayText += ` (ПТМ: ${size.ptm} мм)`;
-        if (size.perimeter) displayText += `, П: ${size.perimeter} мм`;
+        if (size.areaPerMeter) displayText += `, Площадь: ${size.areaPerMeter} м²/м.п.`;
         
         sizeOption.textContent = displayText;
         sizeOption.setAttribute('data-index', index);
@@ -2640,7 +2552,6 @@
       document.getElementById('selected-size-ptm').textContent = size.ptm || '-';
       document.getElementById('selected-size-perimeter').textContent = size.perimeter || '-';
       document.getElementById('selected-size-areaPerMeter').textContent = size.areaPerMeter || '-';
-      document.getElementById('selected-size-areaPerTon').textContent = size.areaPerTon || '-';
     }
 
     function findNearestPTM(ptm, table) {
@@ -2664,7 +2575,7 @@
       if (currentCalcTab === 'manual') {
         ptm = parseFloat(document.getElementById('ptm').value);
         const length = parseFloat(document.getElementById('length').value);
-        const weight = parseFloat(document.getElementById('weight').value);
+        const inputArea = document.getElementById('area').value;
         
         if (!ptm || ptm < 1.0 || ptm > 18.0) {
           showNotification('Введите корректную ПТМ (1.0-18.0 мм)', 'error');
@@ -2672,18 +2583,21 @@
         }
         
         if (!length || length <= 0) {
-          showNotification('Введите длину', 'error');
+          showNotification('Введите длину конструкций', 'error');
           return;
         }
         
-        if (!weight || weight <= 0) {
-          showNotification('Введите вес', 'error');
-          return;
+        if (inputArea) {
+          totalArea = parseFloat(inputArea);
+        } else {
+          // Расчет площади по ПТМ и длине
+          const steelDensity = 7850; // кг/м³
+          // Формула: Площадь = (масса) / (плотность стали * ПТМ)
+          // Для упрощения используем формулу: S = L * (1000 / ПТМ) * коэффициент
+          // Где коэффициент учитывает, что ПТМ в мм, а площадь в м²
+          const coefficient = 0.127; // Эмпирический коэффициент
+          totalArea = length * (1000 / ptm) * coefficient;
         }
-        
-        const steelDensity = 7850;
-        const volume = weight * 1000 / steelDensity;
-        totalArea = volume / (ptm / 1000);
       } 
       else if (currentCalcTab === 'profiles') {
         if (!currentProfileSize) {
@@ -2693,47 +2607,20 @@
         
         ptm = currentProfileSize.ptm;
         const length = parseFloat(document.getElementById('profile-length').value);
-        const weight = parseFloat(document.getElementById('profile-weight').value);
         
         if (!length || length <= 0) {
           showNotification('Введите длину профиля', 'error');
           return;
         }
         
-        if (!weight || weight <= 0) {
-          showNotification('Введите вес профиля', 'error');
-          return;
-        }
-        
-        if (currentProfileSize.perimeter && currentProfileSize.perimeter > 0) {
+        if (currentProfileSize.areaPerMeter && currentProfileSize.areaPerMeter > 0) {
+          totalArea = currentProfileSize.areaPerMeter * length;
+        } else if (currentProfileSize.perimeter && currentProfileSize.perimeter > 0) {
           totalArea = (currentProfileSize.perimeter / 1000) * length;
         } else {
-          const steelDensity = 7850;
-          const volume = weight * 1000 / steelDensity;
-          totalArea = volume / (ptm / 1000);
-        }
-      }
-      else if (currentCalcTab === 'sheet') {
-        const thickness = parseFloat(document.getElementById('sheetThickness').value);
-        const weight = parseFloat(document.getElementById('sheetWeight').value);
-        
-        if (!thickness || thickness <= 0) {
-          showNotification('Введите толщину листа', 'error');
+          showNotification('Не удалось рассчитать площадь для выбранного профиля', 'error');
           return;
         }
-        
-        if (!weight || weight <= 0) {
-          showNotification('Введите вес листа', 'error');
-          return;
-        }
-        
-        ptm = thickness;
-        if (ptm < 1.0) ptm = 1.0;
-        if (ptm > 18.0) ptm = 18.0;
-        
-        const steelDensity = 7850;
-        const volume = weight / steelDensity;
-        totalArea = volume / (thickness / 1000);
       }
       
       if (!totalArea || totalArea <= 0) {
@@ -3053,10 +2940,9 @@
       if (currentCalcTab === 'manual') {
         document.getElementById('ptm').value = '5.8';
         document.getElementById('length').value = '10';
-        document.getElementById('weight').value = '1';
+        document.getElementById('area').value = '';
       } else if (currentCalcTab === 'profiles') {
         document.getElementById('profile-length').value = '10';
-        document.getElementById('profile-weight').value = '';
         
         document.querySelectorAll('.profile-type-btn').forEach(btn => {
           btn.classList.remove('active');
@@ -3071,9 +2957,6 @@
         document.getElementById('selected-size-info').classList.add('hidden');
         
         loadProfileSizes();
-      } else if (currentCalcTab === 'sheet') {
-        document.getElementById('sheetThickness').value = '10.0';
-        document.getElementById('sheetWeight').value = '100.0';
       }
       
       document.getElementById('calcResults').innerHTML = `
@@ -4078,7 +3961,6 @@
       currentProduct = "vm";
       currentSurface = "clean_metal";
       currentTimerProduct = "vm";
-      currentCalcProduct = "vm";
       currentFireResistance = "R60";
       
       document.getElementById("category-value").textContent = "Металлические конструкции";
