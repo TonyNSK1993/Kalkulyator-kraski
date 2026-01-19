@@ -1181,30 +1181,6 @@
                   <input type="number" id="ptm" class="form-control" value="5.8" min="1.0" max="18.0" step="0.1">
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-ruler-combined"></i>
-                    Обогреваемый периметр, мм
-                  </label>
-                  <input type="number" id="perimeter" class="form-control" value="1000" min="1" step="1">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-expand-arrows-alt"></i>
-                    Площадь поверхности на 1 м длины, м²
-                  </label>
-                  <input type="number" id="areaPerMeter" class="form-control" value="0.5" min="0.1" step="0.01">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-expand-arrows-alt"></i>
-                    Площадь поверхности на 1 т, м²
-                  </label>
-                  <input type="number" id="areaPerTon" class="form-control" value="26.0" min="0.1" step="0.1">
-                </div>
-
                 <div class="input-group-row">
                   <div class="form-group">
                     <label class="form-label">
@@ -1265,46 +1241,12 @@
                   <div><strong>Площадь/1т:</strong> <span id="selected-size-areaPerTon"></span> м²/т</div>
                 </div>
 
-                <!-- РУЧНОЙ ВВОД ПАРАМЕТРОВ -->
+                <!-- РУЧНОЙ ВВОД ТОЛЬКО ДЛИНЫ И ВЕСА -->
                 <div class="hint-box mt-20">
                   <i class="fas fa-edit"></i>
-                  <strong>Ручной ввод параметров</strong>
+                  <strong>Ввод длины и веса</strong>
                   <div style="margin-top: 10px; font-size: 13px;">
-                    Если нужного размера нет в списке, введите параметры вручную:
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-ruler"></i>
-                    Приведенная толщина металла (ПТМ), мм
-                  </label>
-                  <input type="number" id="profile-ptm" class="form-control" value="5.8" min="1.0" max="18.0" step="0.1">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-ruler-combined"></i>
-                    Обогреваемый периметр, мм
-                  </label>
-                  <input type="number" id="profile-perimeter" class="form-control" value="1000" min="1" step="1">
-                </div>
-
-                <div class="input-group-row">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-expand-arrows-alt"></i>
-                      Площадь поверхности / 1м, м²
-                    </label>
-                    <input type="number" id="profile-areaPerMeter" class="form-control" value="0.5" min="0.1" step="0.01">
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-expand-arrows-alt"></i>
-                      Площадь поверхности / 1т, м²
-                    </label>
-                    <input type="number" id="profile-areaPerTon" class="form-control" value="26.0" min="0.1" step="0.1">
+                    Введите длину профиля и вес для расчета площади:
                   </div>
                 </div>
 
@@ -1356,14 +1298,6 @@
                     </label>
                     <input type="number" id="sheetWeight" class="form-control" value="100.0" min="1" step="0.1">
                   </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-expand-arrows-alt"></i>
-                    Площадь поверхности на 1 т, м²
-                  </label>
-                  <input type="number" id="sheet-areaPerTon" class="form-control" value="12.74" min="0.1" step="0.1">
                 </div>
 
                 <div class="hint-box">
@@ -2692,7 +2626,6 @@
           currentProfileSize = profileData.sizes[sizeIndex];
           
           updateSelectedSizeInfo(currentProfileSize);
-          fillProfileFormFields(currentProfileSize);
         });
         
         sizeOptions.appendChild(sizeOption);
@@ -2708,19 +2641,6 @@
       document.getElementById('selected-size-perimeter').textContent = size.perimeter || '-';
       document.getElementById('selected-size-areaPerMeter').textContent = size.areaPerMeter || '-';
       document.getElementById('selected-size-areaPerTon').textContent = size.areaPerTon || '-';
-    }
-
-    function fillProfileFormFields(size) {
-      if (size.ptm) document.getElementById('profile-ptm').value = size.ptm;
-      if (size.perimeter) document.getElementById('profile-perimeter').value = size.perimeter;
-      if (size.areaPerMeter) document.getElementById('profile-areaPerMeter').value = size.areaPerMeter;
-      if (size.areaPerTon) document.getElementById('profile-areaPerTon').value = size.areaPerTon;
-      
-      const length = parseFloat(document.getElementById('profile-length').value) || 1;
-      if (size.weightPerMeter) {
-        const weight = (size.weightPerMeter * length) / 1000;
-        document.getElementById('profile-weight').value = weight.toFixed(3);
-      }
     }
 
     function findNearestPTM(ptm, table) {
@@ -2743,9 +2663,6 @@
       
       if (currentCalcTab === 'manual') {
         ptm = parseFloat(document.getElementById('ptm').value);
-        const perimeter = parseFloat(document.getElementById('perimeter').value);
-        const areaPerMeter = parseFloat(document.getElementById('areaPerMeter').value);
-        const areaPerTon = parseFloat(document.getElementById('areaPerTon').value);
         const length = parseFloat(document.getElementById('length').value);
         const weight = parseFloat(document.getElementById('weight').value);
         
@@ -2754,55 +2671,51 @@
           return;
         }
         
-        if (perimeter > 0 && length > 0) {
-          totalArea = (perimeter / 1000) * length;
-        } else if (areaPerMeter > 0 && length > 0) {
-          totalArea = areaPerMeter * length;
-        } else if (weight > 0 && areaPerTon > 0) {
-          totalArea = weight * areaPerTon;
-        } else if (weight > 0) {
-          const sheetThickness = parseFloat(document.getElementById('sheetThickness').value) || 10;
-          const steelDensity = 7850;
-          const volume = weight * 1000 / steelDensity;
-          const areaFromWeight = volume / (sheetThickness / 1000);
-          totalArea = areaFromWeight;
-        } else {
-          showNotification('Введите данные для расчета площади', 'error');
+        if (!length || length <= 0) {
+          showNotification('Введите длину', 'error');
           return;
         }
+        
+        if (!weight || weight <= 0) {
+          showNotification('Введите вес', 'error');
+          return;
+        }
+        
+        const steelDensity = 7850;
+        const volume = weight * 1000 / steelDensity;
+        totalArea = volume / (ptm / 1000);
       } 
       else if (currentCalcTab === 'profiles') {
-        ptm = parseFloat(document.getElementById('profile-ptm').value);
-        const perimeter = parseFloat(document.getElementById('profile-perimeter').value);
-        const areaPerMeter = parseFloat(document.getElementById('profile-areaPerMeter').value);
-        const areaPerTon = parseFloat(document.getElementById('profile-areaPerTon').value);
+        if (!currentProfileSize) {
+          showNotification('Выберите размер профиля', 'error');
+          return;
+        }
+        
+        ptm = currentProfileSize.ptm;
         const length = parseFloat(document.getElementById('profile-length').value);
         const weight = parseFloat(document.getElementById('profile-weight').value);
         
-        if (!ptm || ptm < 1.0 || ptm > 18.0) {
-          showNotification('Введите корректную ПТМ (1.0-18.0 мм)', 'error');
+        if (!length || length <= 0) {
+          showNotification('Введите длину профиля', 'error');
           return;
         }
         
-        if (perimeter > 0 && length > 0) {
-          totalArea = (perimeter / 1000) * length;
-        } else if (areaPerMeter > 0 && length > 0) {
-          totalArea = areaPerMeter * length;
-        } else if (weight > 0 && areaPerTon > 0) {
-          totalArea = weight * areaPerTon;
-        } else if (weight > 0) {
+        if (!weight || weight <= 0) {
+          showNotification('Введите вес профиля', 'error');
+          return;
+        }
+        
+        if (currentProfileSize.perimeter && currentProfileSize.perimeter > 0) {
+          totalArea = (currentProfileSize.perimeter / 1000) * length;
+        } else {
           const steelDensity = 7850;
           const volume = weight * 1000 / steelDensity;
           totalArea = volume / (ptm / 1000);
-        } else {
-          showNotification('Введите данные для расчета площади', 'error');
-          return;
         }
       }
       else if (currentCalcTab === 'sheet') {
         const thickness = parseFloat(document.getElementById('sheetThickness').value);
         const weight = parseFloat(document.getElementById('sheetWeight').value);
-        const areaPerTon = parseFloat(document.getElementById('sheet-areaPerTon').value);
         
         if (!thickness || thickness <= 0) {
           showNotification('Введите толщину листа', 'error');
@@ -2818,14 +2731,9 @@
         if (ptm < 1.0) ptm = 1.0;
         if (ptm > 18.0) ptm = 18.0;
         
-        if (areaPerTon > 0) {
-          const weightInTons = weight / 1000;
-          totalArea = weightInTons * areaPerTon;
-        } else {
-          const steelDensity = 7850;
-          const volume = weight / steelDensity;
-          totalArea = volume / (thickness / 1000);
-        }
+        const steelDensity = 7850;
+        const volume = weight / steelDensity;
+        totalArea = volume / (thickness / 1000);
       }
       
       if (!totalArea || totalArea <= 0) {
@@ -3144,16 +3052,9 @@
     function clearCalculator() {
       if (currentCalcTab === 'manual') {
         document.getElementById('ptm').value = '5.8';
-        document.getElementById('perimeter').value = '1000';
-        document.getElementById('areaPerMeter').value = '0.5';
-        document.getElementById('areaPerTon').value = '26.0';
         document.getElementById('length').value = '10';
         document.getElementById('weight').value = '1';
       } else if (currentCalcTab === 'profiles') {
-        document.getElementById('profile-ptm').value = '';
-        document.getElementById('profile-perimeter').value = '';
-        document.getElementById('profile-areaPerMeter').value = '';
-        document.getElementById('profile-areaPerTon').value = '';
         document.getElementById('profile-length').value = '10';
         document.getElementById('profile-weight').value = '';
         
@@ -3173,7 +3074,6 @@
       } else if (currentCalcTab === 'sheet') {
         document.getElementById('sheetThickness').value = '10.0';
         document.getElementById('sheetWeight').value = '100.0';
-        document.getElementById('sheet-areaPerTon').value = '12.74';
       }
       
       document.getElementById('calcResults').innerHTML = `
