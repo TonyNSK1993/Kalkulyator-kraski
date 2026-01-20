@@ -2671,13 +2671,14 @@
       let totalKg = 0;
       let buckets = { konstruktiv: 0, vm: 0, total: 0 };
       
+      // ВАЖНОЕ ИСПРАВЛЕНИЕ: Умножаем расход на площадь для расчета общего количества материала
       if (isSystem) {
         const konstruktivThickness = calculationData.konstruktiv;
         const vmThickness = calculationData.vm;
-        const konstruktivConsumption = konstruktivThickness * 1.35;
-        const vmConsumption = vmThickness * 1.65;
-        totalConsumption = konstruktivConsumption + vmConsumption;
-        totalKg = totalConsumption * totalArea;
+        const konstruktivConsumption = konstruktivThickness * 1.35; // кг/м²
+        const vmConsumption = vmThickness * 1.65; // кг/м²
+        totalConsumption = konstruktivConsumption + vmConsumption; // кг/м²
+        totalKg = totalConsumption * totalArea; // кг = кг/м² * м²
         
         const konstruktivKg = konstruktivConsumption * totalArea;
         const vmKg = vmConsumption * totalArea;
@@ -2685,8 +2686,8 @@
         buckets.vm = Math.ceil(vmKg / 25);
         buckets.total = buckets.konstruktiv + buckets.vm;
       } else {
-        totalConsumption = calculationData.consumption;
-        totalKg = totalConsumption * totalArea;
+        totalConsumption = calculationData.consumption; // кг/м²
+        totalKg = totalConsumption * totalArea; // кг = кг/м² * м²
         buckets.vm = Math.ceil(totalKg / 25);
         buckets.total = buckets.vm;
       }
@@ -2756,6 +2757,7 @@
           <div class="mt-15">
             <div><b>Общий расход материала:</b> ${data.totalKg} кг</div>
             <div><b>Расход на 1 м²:</b> ${data.totalConsumption.toFixed(2)} кг/м²</div>
+            <div><b>Расчет:</b> ${data.totalConsumption.toFixed(2)} кг/м² × ${data.totalArea} м² = ${data.totalKg} кг</div>
           </div>
         </div>
       `;
@@ -2784,6 +2786,7 @@
                     <th>Толщина, мм</th>
                     <th>Расход на 1 м², кг</th>
                     <th>Общий расход, кг</th>
+                    <th>Расчет</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2792,18 +2795,21 @@
                     <td>${konstruktivThickness.toFixed(2)}</td>
                     <td>${konstruktivConsumption.toFixed(2)}</td>
                     <td>${konstruktivKg}</td>
+                    <td>${konstruktivConsumption.toFixed(2)} × ${data.totalArea}</td>
                   </tr>
                   <tr>
                     <td style="font-weight: 600;">Спец-ВМ</td>
                     <td>${vmThickness.toFixed(2)}</td>
                     <td>${vmConsumption.toFixed(2)}</td>
                     <td>${vmKg}</td>
+                    <td>${vmConsumption.toFixed(2)} × ${data.totalArea}</td>
                   </tr>
                   <tr>
                     <td style="font-weight: 800;">Итого система</td>
                     <td>${totalThickness.toFixed(2)}</td>
                     <td>${data.totalConsumption.toFixed(2)}</td>
                     <td style="font-weight: 800;">${data.totalKg}</td>
+                    <td>${data.totalConsumption.toFixed(2)} × ${data.totalArea}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2830,6 +2836,14 @@
                 </div>
                 <div class="info-card-value">${data.calculationData.consumption.toFixed(2)}</div>
                 <div class="info-card-unit">кг/м²</div>
+              </div>
+              
+              <div class="info-card">
+                <div class="info-card-title">
+                  <i class="fas fa-calculator"></i>Расчет
+                </div>
+                <div class="info-card-value">× ${data.totalArea}</div>
+                <div class="info-card-unit">${data.calculationData.consumption.toFixed(2)} кг/м² × ${data.totalArea} м²</div>
               </div>
             </div>
           </div>
@@ -3335,6 +3349,7 @@
           if (area) {
             const totalKg = (prod.consumption.R30.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R30:</b> потребуется ${totalKg} кг материала</div>`;
+            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R30.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3343,6 +3358,7 @@
           if (area) {
             const totalKg = (prod.consumption.R60.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R60:</b> потребуется ${totalKg} кг материала</div>`;
+            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R60.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3351,6 +3367,7 @@
           if (area) {
             const totalKg = (prod.consumption.R90.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R90:</b> потребуется ${totalKg} кг материала</div>`;
+            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R90.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3359,6 +3376,7 @@
           if (area) {
             const totalKg = (prod.consumption.R120.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R120:</b> потребуется ${totalKg} кг материала</div>`;
+            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R120.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3367,6 +3385,7 @@
           if (area) {
             const totalKg = (prod.consumption.standard.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м²:</b> потребуется ${totalKg} кг материала</div>`;
+            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.standard.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3384,6 +3403,7 @@
           
           materialHTML += `<div class="mb-10">• <b>Общий расход системы:</b> ${totalConsumption} кг/м²</div>`;
           materialHTML += `<div class="mb-10">• <b>На ${area} м²:</b> ${totalKg} кг материала</div>`;
+          materialHTML += `<div class="mb-10">• <b>Расчет:</b> ${totalConsumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           
           if (prod.consumption.R60.components) {
             materialHTML += `<div class="mt-10"><b>Детализация по компонентам:</b></div>`;
@@ -3911,6 +3931,7 @@
           if (area && area !== "не указана") {
             const totalKg = (lastCalculation.consumption.R60.consumption * area).toFixed(1);
             reportText += `  На ${area} м² потребуется ${totalKg} кг материала\n`;
+            reportText += `  Расчет: ${lastCalculation.consumption.R60.consumption} кг/м² × ${area} м² = ${totalKg} кг\n`;
           }
         }
         
