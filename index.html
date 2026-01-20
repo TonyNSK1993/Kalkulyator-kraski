@@ -1197,7 +1197,18 @@
                   <div class="hint-box mt-10">
                     <i class="fas fa-info-circle"></i>
                     Если оставить пустым, площадь будет рассчитана автоматически по ПТМ и длине
+                    <div id="calculatedAreaInfo" class="mt-10 hidden">
+                      <i class="fas fa-calculator"></i>
+                      <span>Расчетная площадь: <span id="calculatedAreaValue">0</span> м²</span>
+                    </div>
                   </div>
+                </div>
+                
+                <!-- Кнопка для расчета площади -->
+                <div class="form-group mt-20">
+                  <button class="btn btn-outline" onclick="calculateAreaFromPTM()" style="width: 100%;">
+                    <i class="fas fa-calculator"></i>Рассчитать площадь из ПТМ и длины
+                  </button>
                 </div>
               </div>
 
@@ -2459,9 +2470,115 @@
       initProfileButtons();
       loadProfileSizes();
       updateProductOptions();
+      
+      // Добавляем обработчики для автоматического расчета площади
+      document.getElementById('ptm').addEventListener('input', function() {
+        if (currentCalcTab === 'manual') {
+          updateCalculatedAreaInfo();
+        }
+      });
+      
+      document.getElementById('length').addEventListener('input', function() {
+        if (currentCalcTab === 'manual') {
+          updateCalculatedAreaInfo();
+        }
+      });
+      
+      // Инициализируем отображение расчетной площади
+      updateCalculatedAreaInfo();
     });
 
     // ========== ФУНКЦИИ ДЛЯ КАЛЬКУЛЯТОРА РАСХОДА ==========
+    
+    // Функция для расчета площади из ПТМ и длины
+    function calculateAreaFromPTM() {
+      if (currentCalcTab !== 'manual') return;
+      
+      const ptm = parseFloat(document.getElementById('ptm').value);
+      const length = parseFloat(document.getElementById('length').value);
+      
+      if (!ptm || ptm < 1.0 || ptm > 18.0) {
+        showNotification('Введите корректную ПТМ (1.0-18.0 мм)', 'error');
+        return;
+      }
+      
+      if (!length || length <= 0) {
+        showNotification('Введите длину конструкций', 'error');
+        return;
+      }
+      
+      // Расчет площади по ПТМ и длине
+      // Для металлических конструкций площадь можно рассчитать по формуле:
+      // Площадь (м²) = Длина (м) × Коэффициент формы × (1000 / ПТМ)
+      // Коэффициент формы зависит от типа профиля, но для упрощения
+      // используем средний коэффициент для стандартных профилей
+      
+      const calculatedArea = calculateAreaFromPTMAndLength(ptm, length);
+      
+      // Устанавливаем рассчитанное значение в поле ввода
+      document.getElementById('area').value = calculatedArea.toFixed(2);
+      
+      // Обновляем информацию о расчетной площади
+      updateCalculatedAreaInfo();
+      
+      showNotification(`Площадь рассчитана: ${calculatedArea.toFixed(2)} м²`, 'success');
+    }
+    
+    // Основная функция расчета площади из ПТМ и длины
+    function calculateAreaFromPTMAndLength(ptm, length) {
+      // Коэффициент формы для различных типов профилей
+      // Это упрощенная модель, основанная на стандартных профилях
+      let shapeFactor = 0.4; // средний коэффициент для металлоконструкций
+      
+      // Корректировка коэффициента в зависимости от ПТМ
+      if (ptm < 3) shapeFactor = 0.45;
+      else if (ptm < 5) shapeFactor = 0.42;
+      else if (ptm < 8) shapeFactor = 0.38;
+      else if (ptm < 12) shapeFactor = 0.35;
+      else shapeFactor = 0.32;
+      
+      // Расчет площади: S = L × K × (1000 / ПТМ)
+      // Где: L - длина в метрах, K - коэффициент формы, ПТМ в мм
+      const area = length * shapeFactor * (1000 / ptm);
+      
+      return area;
+    }
+    
+    // Обновление информации о расчетной площади
+    function updateCalculatedAreaInfo() {
+      if (currentCalcTab !== 'manual') return;
+      
+      const ptm = parseFloat(document.getElementById('ptm').value);
+      const length = parseFloat(document.getElementById('length').value);
+      const areaInput = document.getElementById('area').value;
+      
+      if (!ptm || !length || ptm <= 0 || length <= 0) {
+        document.getElementById('calculatedAreaInfo').classList.add('hidden');
+        return;
+      }
+      
+      const calculatedArea = calculateAreaFromPTMAndLength(ptm, length);
+      document.getElementById('calculatedAreaValue').textContent = calculatedArea.toFixed(2);
+      document.getElementById('calculatedAreaInfo').classList.remove('hidden');
+      
+      // Если площадь введена вручную, сравниваем с расчетной
+      if (areaInput) {
+        const manualArea = parseFloat(areaInput);
+        const diff = Math.abs(calculatedArea - manualArea);
+        const diffPercent = (diff / calculatedArea * 100).toFixed(1);
+        
+        if (diffPercent > 10) {
+          document.getElementById('calculatedAreaInfo').innerHTML = 
+            `<i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+            <span>Расчетная площадь: ${calculatedArea.toFixed(2)} м² (отличается на ${diffPercent}% от введенной)</span>`;
+        } else {
+          document.getElementById('calculatedAreaInfo').innerHTML = 
+            `<i class="fas fa-check-circle" style="color: var(--success);"></i>
+            <span>Расчетная площадь: ${calculatedArea.toFixed(2)} м² (совпадает с введенной)</span>`;
+        }
+      }
+    }
+
     function switchCalcTab(tabName) {
       currentCalcTab = tabName;
       
@@ -2478,6 +2595,8 @@
       
       if (tabName === 'profiles') {
         loadProfileSizes();
+      } else if (tabName === 'manual') {
+        updateCalculatedAreaInfo();
       }
     }
 
@@ -2570,11 +2689,11 @@
     }
 
     function calculateMaterial() {
-      let ptm, totalArea;
+      let ptm, totalArea, length;
       
       if (currentCalcTab === 'manual') {
         ptm = parseFloat(document.getElementById('ptm').value);
-        const length = parseFloat(document.getElementById('length').value);
+        length = parseFloat(document.getElementById('length').value);
         const inputArea = document.getElementById('area').value;
         
         if (!ptm || ptm < 1.0 || ptm > 18.0) {
@@ -2589,14 +2708,20 @@
         
         if (inputArea) {
           totalArea = parseFloat(inputArea);
+          
+          // Проверяем, совпадает ли введенная площадь с расчетной
+          const calculatedArea = calculateAreaFromPTMAndLength(ptm, length);
+          const diff = Math.abs(totalArea - calculatedArea);
+          const diffPercent = (diff / calculatedArea * 100);
+          
+          if (diffPercent > 10) {
+            showNotification(`Внимание: введенная площадь отличается от расчетной на ${diffPercent.toFixed(1)}%`, 'warning');
+          }
         } else {
-          // Расчет площади по ПТМ и длине
-          const steelDensity = 7850; // кг/м³
-          // Формула: Площадь = (масса) / (плотность стали * ПТМ)
-          // Для упрощения используем формулу: S = L * (1000 / ПТМ) * коэффициент
-          // Где коэффициент учитывает, что ПТМ в мм, а площадь в м²
-          const coefficient = 0.127; // Эмпирический коэффициент
-          totalArea = length * (1000 / ptm) * coefficient;
+          // Если площадь не указана, рассчитываем ее
+          totalArea = calculateAreaFromPTMAndLength(ptm, length);
+          document.getElementById('area').value = totalArea.toFixed(2);
+          showNotification(`Площадь рассчитана автоматически: ${totalArea.toFixed(2)} м²`, 'success');
         }
       } 
       else if (currentCalcTab === 'profiles') {
@@ -2606,7 +2731,7 @@
         }
         
         ptm = currentProfileSize.ptm;
-        const length = parseFloat(document.getElementById('profile-length').value);
+        length = parseFloat(document.getElementById('profile-length').value);
         
         if (!length || length <= 0) {
           showNotification('Введите длину профиля', 'error');
@@ -2671,14 +2796,13 @@
       let totalKg = 0;
       let buckets = { konstruktiv: 0, vm: 0, total: 0 };
       
-      // ВАЖНОЕ ИСПРАВЛЕНИЕ: Умножаем расход на площадь для расчета общего количества материала
       if (isSystem) {
         const konstruktivThickness = calculationData.konstruktiv;
         const vmThickness = calculationData.vm;
-        const konstruktivConsumption = konstruktivThickness * 1.35; // кг/м²
-        const vmConsumption = vmThickness * 1.65; // кг/м²
-        totalConsumption = konstruktivConsumption + vmConsumption; // кг/м²
-        totalKg = totalConsumption * totalArea; // кг = кг/м² * м²
+        const konstruktivConsumption = konstruktivThickness * 1.35;
+        const vmConsumption = vmThickness * 1.65;
+        totalConsumption = konstruktivConsumption + vmConsumption;
+        totalKg = totalConsumption * totalArea;
         
         const konstruktivKg = konstruktivConsumption * totalArea;
         const vmKg = vmConsumption * totalArea;
@@ -2686,8 +2810,8 @@
         buckets.vm = Math.ceil(vmKg / 25);
         buckets.total = buckets.konstruktiv + buckets.vm;
       } else {
-        totalConsumption = calculationData.consumption; // кг/м²
-        totalKg = totalConsumption * totalArea; // кг = кг/м² * м²
+        totalConsumption = calculationData.consumption;
+        totalKg = totalConsumption * totalArea;
         buckets.vm = Math.ceil(totalKg / 25);
         buckets.total = buckets.vm;
       }
@@ -2695,6 +2819,7 @@
       displayResults({
         ptm: ptm,
         fireResistance: fireResistance,
+        length: length,
         totalArea: totalArea.toFixed(2),
         systemType: systemType,
         calculationData: calculationData,
@@ -2731,10 +2856,10 @@
             
             <div class="info-card">
               <div class="info-card-title">
-                <i class="fas fa-fire"></i>Огнестойкость
+                <i class="fas fa-ruler-vertical"></i>Длина
               </div>
-              <div class="info-card-value">${data.fireResistance}</div>
-              <div class="info-card-unit">минут</div>
+              <div class="info-card-value">${data.length}</div>
+              <div class="info-card-unit">м</div>
             </div>
             
             <div class="info-card">
@@ -2743,6 +2868,14 @@
               </div>
               <div class="info-card-value">${data.totalArea}</div>
               <div class="info-card-unit">м²</div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-card-title">
+                <i class="fas fa-fire"></i>Огнестойкость
+              </div>
+              <div class="info-card-value">${data.fireResistance}</div>
+              <div class="info-card-unit">минут</div>
             </div>
             
             <div class="info-card">
@@ -2757,7 +2890,6 @@
           <div class="mt-15">
             <div><b>Общий расход материала:</b> ${data.totalKg} кг</div>
             <div><b>Расход на 1 м²:</b> ${data.totalConsumption.toFixed(2)} кг/м²</div>
-            <div><b>Расчет:</b> ${data.totalConsumption.toFixed(2)} кг/м² × ${data.totalArea} м² = ${data.totalKg} кг</div>
           </div>
         </div>
       `;
@@ -2786,7 +2918,6 @@
                     <th>Толщина, мм</th>
                     <th>Расход на 1 м², кг</th>
                     <th>Общий расход, кг</th>
-                    <th>Расчет</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2795,21 +2926,18 @@
                     <td>${konstruktivThickness.toFixed(2)}</td>
                     <td>${konstruktivConsumption.toFixed(2)}</td>
                     <td>${konstruktivKg}</td>
-                    <td>${konstruktivConsumption.toFixed(2)} × ${data.totalArea}</td>
                   </tr>
                   <tr>
                     <td style="font-weight: 600;">Спец-ВМ</td>
                     <td>${vmThickness.toFixed(2)}</td>
                     <td>${vmConsumption.toFixed(2)}</td>
                     <td>${vmKg}</td>
-                    <td>${vmConsumption.toFixed(2)} × ${data.totalArea}</td>
                   </tr>
                   <tr>
                     <td style="font-weight: 800;">Итого система</td>
                     <td>${totalThickness.toFixed(2)}</td>
                     <td>${data.totalConsumption.toFixed(2)}</td>
                     <td style="font-weight: 800;">${data.totalKg}</td>
-                    <td>${data.totalConsumption.toFixed(2)} × ${data.totalArea}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2836,14 +2964,6 @@
                 </div>
                 <div class="info-card-value">${data.calculationData.consumption.toFixed(2)}</div>
                 <div class="info-card-unit">кг/м²</div>
-              </div>
-              
-              <div class="info-card">
-                <div class="info-card-title">
-                  <i class="fas fa-calculator"></i>Расчет
-                </div>
-                <div class="info-card-value">× ${data.totalArea}</div>
-                <div class="info-card-unit">${data.calculationData.consumption.toFixed(2)} кг/м² × ${data.totalArea} м²</div>
               </div>
             </div>
           </div>
@@ -2955,6 +3075,7 @@
         document.getElementById('ptm').value = '5.8';
         document.getElementById('length').value = '10';
         document.getElementById('area').value = '';
+        document.getElementById('calculatedAreaInfo').classList.add('hidden');
       } else if (currentCalcTab === 'profiles') {
         document.getElementById('profile-length').value = '10';
         
@@ -3189,6 +3310,12 @@
         updateProductOptions();
       }
       
+      if (tabName === 'calculator') {
+        if (currentCalcTab === 'manual') {
+          updateCalculatedAreaInfo();
+        }
+      }
+      
       closeAllDropdowns();
     }
 
@@ -3349,7 +3476,6 @@
           if (area) {
             const totalKg = (prod.consumption.R30.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R30:</b> потребуется ${totalKg} кг материала</div>`;
-            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R30.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3358,7 +3484,6 @@
           if (area) {
             const totalKg = (prod.consumption.R60.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R60:</b> потребуется ${totalKg} кг материала</div>`;
-            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R60.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3367,7 +3492,6 @@
           if (area) {
             const totalKg = (prod.consumption.R90.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R90:</b> потребуется ${totalKg} кг материала</div>`;
-            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R90.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3376,7 +3500,6 @@
           if (area) {
             const totalKg = (prod.consumption.R120.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м² для R120:</b> потребуется ${totalKg} кг материала</div>`;
-            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.R120.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3385,7 +3508,6 @@
           if (area) {
             const totalKg = (prod.consumption.standard.consumption * area).toFixed(1);
             fireResistanceHTML += `<div>• <b>На ${area} м²:</b> потребуется ${totalKg} кг материала</div>`;
-            fireResistanceHTML += `<div>• <b>Расчет:</b> ${prod.consumption.standard.consumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           }
         }
         
@@ -3403,7 +3525,6 @@
           
           materialHTML += `<div class="mb-10">• <b>Общий расход системы:</b> ${totalConsumption} кг/м²</div>`;
           materialHTML += `<div class="mb-10">• <b>На ${area} м²:</b> ${totalKg} кг материала</div>`;
-          materialHTML += `<div class="mb-10">• <b>Расчет:</b> ${totalConsumption} кг/м² × ${area} м² = ${totalKg} кг</div>`;
           
           if (prod.consumption.R60.components) {
             materialHTML += `<div class="mt-10"><b>Детализация по компонентам:</b></div>`;
@@ -3931,7 +4052,6 @@
           if (area && area !== "не указана") {
             const totalKg = (lastCalculation.consumption.R60.consumption * area).toFixed(1);
             reportText += `  На ${area} м² потребуется ${totalKg} кг материала\n`;
-            reportText += `  Расчет: ${lastCalculation.consumption.R60.consumption} кг/м² × ${area} м² = ${totalKg} кг\n`;
           }
         }
         
