@@ -2724,29 +2724,23 @@
           showNotification(`Площадь рассчитана автоматически: ${totalArea.toFixed(2)} м²`, 'success');
         }
       } 
-      else if (currentCalcTab === 'profiles') {
-        if (!currentProfileSize) {
-          showNotification('Выберите размер профиля', 'error');
-          return;
-        }
-        
-        ptm = currentProfileSize.ptm;
-        length = parseFloat(document.getElementById('profile-length').value);
-        
-        if (!length || length <= 0) {
-          showNotification('Введите длину профиля', 'error');
-          return;
-        }
-        
-        if (currentProfileSize.areaPerMeter && currentProfileSize.areaPerMeter > 0) {
-          totalArea = currentProfileSize.areaPerMeter * length;
-        } else if (currentProfileSize.perimeter && currentProfileSize.perimeter > 0) {
-          totalArea = (currentProfileSize.perimeter / 1000) * length;
-        } else {
-          showNotification('Не удалось рассчитать площадь для выбранного профиля', 'error');
-          return;
-        }
-      }
+else if (currentCalcTab === 'profiles') {
+  if (!currentProfileSize) {
+    showNotification('Выберите размер профиля', 'error');
+    return;
+  }
+  
+  ptm = currentProfileSize.ptm;
+  length = parseFloat(document.getElementById('profile-length').value);
+  
+  if (!length || length <= 0) {
+    showNotification('Введите длину профиля', 'error');
+    return;
+  }
+  
+  // ПРОСТО ДЕЛАЕМ ПЛОЩАДЬ РАВНОЙ ДЛИНЕ
+  totalArea = length;  // ← ВОТ ЭТА СТРОКА ВАЖНА!
+}
       
       if (!totalArea || totalArea <= 0) {
         showNotification('Не удалось рассчитать площадь', 'error');
@@ -2818,6 +2812,7 @@
       
       displayResults({
         ptm: ptm,
+        length: length,
         fireResistance: fireResistance,
         length: length,
         totalArea: totalArea.toFixed(2),
@@ -3070,47 +3065,48 @@
       }
     }
 
-    function clearCalculator() {
-      if (currentCalcTab === 'manual') {
-        document.getElementById('ptm').value = '5.8';
-        document.getElementById('length').value = '10';
-        document.getElementById('area').value = '';
-        document.getElementById('calculatedAreaInfo').classList.add('hidden');
-      } else if (currentCalcTab === 'profiles') {
-        document.getElementById('profile-length').value = '10';
-        
-        document.querySelectorAll('.profile-type-btn').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        document.querySelector('.profile-type-btn[data-type="i-beam"]').classList.add('active');
-        currentProfileType = 'i-beam';
-        
-        document.querySelectorAll('.size-option').forEach(opt => {
-          opt.classList.remove('selected');
-        });
-        currentProfileSize = null;
-        document.getElementById('selected-size-info').classList.add('hidden');
-        
-        loadProfileSizes();
-      }
-      
-      document.getElementById('calcResults').innerHTML = `
-        <div class="text-center" style="padding: 40px 20px; color: var(--nzsk-gray-dark);">
-          <i class="fas fa-calculator" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
-          <div style="font-size: 16px; font-weight: 600;">Введите параметры для расчета</div>
-          <div style="font-size: 14px; margin-top: 10px;">Нажмите "Рассчитать расход" для получения результатов</div>
-        </div>
-      `;
-      
-      document.getElementById('calcResultStatus').textContent = 'Ожидание расчета';
-      document.getElementById('calcResultStatus').className = 'status-badge status-info';
-      
-      document.getElementById('detailedCalculation').classList.add('hidden');
-      document.getElementById('packingInfo').classList.add('hidden');
-      document.getElementById('technicalInfo').classList.add('hidden');
-      
-      showNotification('Калькулятор очищен', 'success');
-    }
+function clearCalculator() {
+  if (currentCalcTab === 'manual') {
+    document.getElementById('ptm').value = '5.8';
+    document.getElementById('length').value = '10';
+    document.getElementById('area').value = '';
+    document.getElementById('calculatedAreaInfo').classList.add('hidden');
+  } else if (currentCalcTab === 'profiles') {
+    document.getElementById('profile-length').value = '10';
+    document.getElementById('area').value = '';  // ← ВОТ ЭТУ СТРОЧКУ ДОБАВЬТЕ
+    
+    document.querySelectorAll('.profile-type-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector('.profile-type-btn[data-type="i-beam"]').classList.add('active');
+    currentProfileType = 'i-beam';
+    
+    document.querySelectorAll('.size-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    currentProfileSize = null;
+    document.getElementById('selected-size-info').classList.add('hidden');
+    
+    loadProfileSizes();
+  }
+  
+  document.getElementById('calcResults').innerHTML = `
+    <div class="text-center" style="padding: 40px 20px; color: var(--nzsk-gray-dark);">
+      <i class="fas fa-calculator" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+      <div style="font-size: 16px; font-weight: 600;">Введите параметры для расчета</div>
+      <div style="font-size: 14px; margin-top: 10px;">Нажмите "Рассчитать расход" для получения результатов</div>
+    </div>
+  `;
+  
+  document.getElementById('calcResultStatus').textContent = 'Ожидание расчета';
+  document.getElementById('calcResultStatus').className = 'status-badge status-info';
+  
+  document.getElementById('detailedCalculation').classList.add('hidden');
+  document.getElementById('packingInfo').classList.add('hidden');
+  document.getElementById('technicalInfo').classList.add('hidden');
+  
+  showNotification('Калькулятор очищен', 'success');
+}
 
     // ========== ФУНКЦИИ ДЛЯ ПРОВЕРКИ УСЛОВИЙ ==========
     function updateProductOptions() {
