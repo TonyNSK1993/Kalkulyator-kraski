@@ -1186,28 +1186,32 @@
                     Длина конструкций, м
                   </label>
                   <input type="number" id="length" class="form-control" value="10" min="0.1" step="0.1">
+                  <div class="hint-box mt-10">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>ВНИМАНИЕ:</strong> При ручном вводе длина будет использоваться как площадь (S = L)
+                  </div>
                 </div>
 
                 <div class="form-group">
                   <label class="form-label">
                     <i class="fas fa-ruler-combined"></i>
-                    Площадь поверхности, м²
+                    Площадь поверхности, м² (ОПЦИОНАЛЬНО)
                   </label>
-                  <input type="number" id="area" class="form-control" placeholder="Введите площадь или оставьте для расчета">
+                  <input type="number" id="area" class="form-control" placeholder="Введите площадь, если отличается от длины">
                   <div class="hint-box mt-10">
                     <i class="fas fa-info-circle"></i>
-                    Если оставить пустым, площадь будет рассчитана автоматически по ПТМ и длине
+                    Если оставить пустым, площадь будет равна длине
                     <div id="calculatedAreaInfo" class="mt-10 hidden">
                       <i class="fas fa-calculator"></i>
-                      <span>Расчетная площадь: <span id="calculatedAreaValue">0</span> м²</span>
+                      <span>Используемая площадь: <span id="calculatedAreaValue">0</span> м²</span>
                     </div>
                   </div>
                 </div>
                 
                 <!-- Кнопка для расчета площади -->
                 <div class="form-group mt-20">
-                  <button class="btn btn-outline" onclick="calculateAreaFromPTM()" style="width: 100%;">
-                    <i class="fas fa-calculator"></i>Рассчитать площадь из ПТМ и длины
+                  <button class="btn btn-outline" onclick="updateAreaFromLength()" style="width: 100%;">
+                    <i class="fas fa-sync-alt"></i>Рассчитать площадь из длины
                   </button>
                 </div>
               </div>
@@ -2472,110 +2476,53 @@
       updateProductOptions();
       
       // Добавляем обработчики для автоматического расчета площади
-      document.getElementById('ptm').addEventListener('input', function() {
-        if (currentCalcTab === 'manual') {
-          updateCalculatedAreaInfo();
-        }
-      });
-      
       document.getElementById('length').addEventListener('input', function() {
         if (currentCalcTab === 'manual') {
-          updateCalculatedAreaInfo();
+          updateAreaFromLength();
         }
       });
       
       // Инициализируем отображение расчетной площади
-      updateCalculatedAreaInfo();
+      updateAreaFromLength();
     });
 
     // ========== ФУНКЦИИ ДЛЯ КАЛЬКУЛЯТОРА РАСХОДА ==========
     
-    // Функция для расчета площади из ПТМ и длины
-    function calculateAreaFromPTM() {
+    // Функция для расчета площади из длины
+    function updateAreaFromLength() {
       if (currentCalcTab !== 'manual') return;
       
-      const ptm = parseFloat(document.getElementById('ptm').value);
       const length = parseFloat(document.getElementById('length').value);
-      
-      if (!ptm || ptm < 1.0 || ptm > 18.0) {
-        showNotification('Введите корректную ПТМ (1.0-18.0 мм)', 'error');
-        return;
-      }
       
       if (!length || length <= 0) {
-        showNotification('Введите длину конструкций', 'error');
-        return;
-      }
-      
-      // Расчет площади по ПТМ и длине
-      // Для металлических конструкций площадь можно рассчитать по формуле:
-      // Площадь (м²) = Длина (м) × Коэффициент формы × (1000 / ПТМ)
-      // Коэффициент формы зависит от типа профиля, но для упрощения
-      // используем средний коэффициент для стандартных профилей
-      
-      const calculatedArea = calculateAreaFromPTMAndLength(ptm, length);
-      
-      // Устанавливаем рассчитанное значение в поле ввода
-      document.getElementById('area').value = calculatedArea.toFixed(2);
-      
-      // Обновляем информацию о расчетной площади
-      updateCalculatedAreaInfo();
-      
-      showNotification(`Площадь рассчитана: ${calculatedArea.toFixed(2)} м²`, 'success');
-    }
-    
-    // Основная функция расчета площади из ПТМ и длины
-    function calculateAreaFromPTMAndLength(ptm, length) {
-      // Коэффициент формы для различных типов профилей
-      // Это упрощенная модель, основанная на стандартных профилях
-      let shapeFactor = 0.4; // средний коэффициент для металлоконструкций
-      
-      // Корректировка коэффициента в зависимости от ПТМ
-      if (ptm < 3) shapeFactor = 0.45;
-      else if (ptm < 5) shapeFactor = 0.42;
-      else if (ptm < 8) shapeFactor = 0.38;
-      else if (ptm < 12) shapeFactor = 0.35;
-      else shapeFactor = 0.32;
-      
-      // Расчет площади: S = L × K × (1000 / ПТМ)
-      // Где: L - длина в метрах, K - коэффициент формы, ПТМ в мм
-      const area = length * shapeFactor * (1000 / ptm);
-      
-      return area;
-    }
-    
-    // Обновление информации о расчетной площади
-    function updateCalculatedAreaInfo() {
-      if (currentCalcTab !== 'manual') return;
-      
-      const ptm = parseFloat(document.getElementById('ptm').value);
-      const length = parseFloat(document.getElementById('length').value);
-      const areaInput = document.getElementById('area').value;
-      
-      if (!ptm || !length || ptm <= 0 || length <= 0) {
         document.getElementById('calculatedAreaInfo').classList.add('hidden');
         return;
       }
       
-      const calculatedArea = calculateAreaFromPTMAndLength(ptm, length);
-      document.getElementById('calculatedAreaValue').textContent = calculatedArea.toFixed(2);
+      // Площадь равна длине
+      document.getElementById('calculatedAreaValue').textContent = length.toFixed(2);
       document.getElementById('calculatedAreaInfo').classList.remove('hidden');
       
-      // Если площадь введена вручную, сравниваем с расчетной
+      // Если площадь введена вручную, сравниваем с длиной
+      const areaInput = document.getElementById('area').value;
       if (areaInput) {
         const manualArea = parseFloat(areaInput);
-        const diff = Math.abs(calculatedArea - manualArea);
-        const diffPercent = (diff / calculatedArea * 100).toFixed(1);
+        const diff = Math.abs(length - manualArea);
+        const diffPercent = (diff / length * 100).toFixed(1);
         
         if (diffPercent > 10) {
           document.getElementById('calculatedAreaInfo').innerHTML = 
             `<i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
-            <span>Расчетная площадь: ${calculatedArea.toFixed(2)} м² (отличается на ${diffPercent}% от введенной)</span>`;
+            <span>Используемая площадь: ${length.toFixed(2)} м² (отличается на ${diffPercent}% от введенной площади)</span>`;
         } else {
           document.getElementById('calculatedAreaInfo').innerHTML = 
             `<i class="fas fa-check-circle" style="color: var(--success);"></i>
-            <span>Расчетная площадь: ${calculatedArea.toFixed(2)} м² (совпадает с введенной)</span>`;
+            <span>Используемая площадь: ${length.toFixed(2)} м² (совпадает с введенной площадью)</span>`;
         }
+      } else {
+        document.getElementById('calculatedAreaInfo').innerHTML = 
+          `<i class="fas fa-info-circle" style="color: var(--info);"></i>
+          <span>Используемая площадь: ${length.toFixed(2)} м² (равна длине)</span>`;
       }
     }
 
@@ -2596,7 +2543,7 @@
       if (tabName === 'profiles') {
         loadProfileSizes();
       } else if (tabName === 'manual') {
-        updateCalculatedAreaInfo();
+        updateAreaFromLength();
       }
     }
 
@@ -2709,38 +2656,41 @@
         if (inputArea) {
           totalArea = parseFloat(inputArea);
           
-          // Проверяем, совпадает ли введенная площадь с расчетной
-          const calculatedArea = calculateAreaFromPTMAndLength(ptm, length);
-          const diff = Math.abs(totalArea - calculatedArea);
-          const diffPercent = (diff / calculatedArea * 100);
+          // Проверяем, совпадает ли введенная площадь с длиной
+          const diff = Math.abs(totalArea - length);
+          const diffPercent = (diff / length * 100);
           
           if (diffPercent > 10) {
-            showNotification(`Внимание: введенная площадь отличается от расчетной на ${diffPercent.toFixed(1)}%`, 'warning');
+            showNotification(`Внимание: введенная площадь отличается от длины на ${diffPercent.toFixed(1)}%`, 'warning');
           }
         } else {
-          // Если площадь не указана, рассчитываем ее
-          totalArea = calculateAreaFromPTMAndLength(ptm, length);
-          document.getElementById('area').value = totalArea.toFixed(2);
-          showNotification(`Площадь рассчитана автоматически: ${totalArea.toFixed(2)} м²`, 'success');
+          // Если площадь не указана, используем длину
+          totalArea = length;
+          showNotification(`Площадь принята равной длине: ${totalArea.toFixed(2)} м²`, 'success');
         }
       } 
-else if (currentCalcTab === 'profiles') {
-  if (!currentProfileSize) {
-    showNotification('Выберите размер профиля', 'error');
-    return;
-  }
-  
-  ptm = currentProfileSize.ptm;
-  length = parseFloat(document.getElementById('profile-length').value);
-  
-  if (!length || length <= 0) {
-    showNotification('Введите длину профиля', 'error');
-    return;
-  }
-  
-  // ПРОСТО ДЕЛАЕМ ПЛОЩАДЬ РАВНОЙ ДЛИНЕ
-  totalArea = length;  // ← ВОТ ЭТА СТРОКА ВАЖНА!
-}
+      else if (currentCalcTab === 'profiles') {
+        if (!currentProfileSize) {
+          showNotification('Выберите размер профиля', 'error');
+          return;
+        }
+        
+        ptm = currentProfileSize.ptm;
+        length = parseFloat(document.getElementById('profile-length').value);
+        
+        if (!length || length <= 0) {
+          showNotification('Введите длину профиля', 'error');
+          return;
+        }
+        
+        // Для профилей используем площадь на 1 метр * длину
+        if (currentProfileSize.areaPerMeter) {
+          totalArea = currentProfileSize.areaPerMeter * length;
+        } else {
+          // Если нет данных о площади на 1 метр, используем длину
+          totalArea = length;
+        }
+      }
       
       if (!totalArea || totalArea <= 0) {
         showNotification('Не удалось рассчитать площадь', 'error');
@@ -2814,7 +2764,6 @@ else if (currentCalcTab === 'profiles') {
         ptm: ptm,
         length: length,
         fireResistance: fireResistance,
-        length: length,
         totalArea: totalArea.toFixed(2),
         systemType: systemType,
         calculationData: calculationData,
@@ -3065,48 +3014,47 @@ else if (currentCalcTab === 'profiles') {
       }
     }
 
-function clearCalculator() {
-  if (currentCalcTab === 'manual') {
-    document.getElementById('ptm').value = '5.8';
-    document.getElementById('length').value = '10';
-    document.getElementById('area').value = '';
-    document.getElementById('calculatedAreaInfo').classList.add('hidden');
-  } else if (currentCalcTab === 'profiles') {
-    document.getElementById('profile-length').value = '10';
-    document.getElementById('area').value = '';  // ← ВОТ ЭТУ СТРОЧКУ ДОБАВЬТЕ
-    
-    document.querySelectorAll('.profile-type-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    document.querySelector('.profile-type-btn[data-type="i-beam"]').classList.add('active');
-    currentProfileType = 'i-beam';
-    
-    document.querySelectorAll('.size-option').forEach(opt => {
-      opt.classList.remove('selected');
-    });
-    currentProfileSize = null;
-    document.getElementById('selected-size-info').classList.add('hidden');
-    
-    loadProfileSizes();
-  }
-  
-  document.getElementById('calcResults').innerHTML = `
-    <div class="text-center" style="padding: 40px 20px; color: var(--nzsk-gray-dark);">
-      <i class="fas fa-calculator" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
-      <div style="font-size: 16px; font-weight: 600;">Введите параметры для расчета</div>
-      <div style="font-size: 14px; margin-top: 10px;">Нажмите "Рассчитать расход" для получения результатов</div>
-    </div>
-  `;
-  
-  document.getElementById('calcResultStatus').textContent = 'Ожидание расчета';
-  document.getElementById('calcResultStatus').className = 'status-badge status-info';
-  
-  document.getElementById('detailedCalculation').classList.add('hidden');
-  document.getElementById('packingInfo').classList.add('hidden');
-  document.getElementById('technicalInfo').classList.add('hidden');
-  
-  showNotification('Калькулятор очищен', 'success');
-}
+    function clearCalculator() {
+      if (currentCalcTab === 'manual') {
+        document.getElementById('ptm').value = '5.8';
+        document.getElementById('length').value = '10';
+        document.getElementById('area').value = '';
+        document.getElementById('calculatedAreaInfo').classList.add('hidden');
+      } else if (currentCalcTab === 'profiles') {
+        document.getElementById('profile-length').value = '10';
+        
+        document.querySelectorAll('.profile-type-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        document.querySelector('.profile-type-btn[data-type="i-beam"]').classList.add('active');
+        currentProfileType = 'i-beam';
+        
+        document.querySelectorAll('.size-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        currentProfileSize = null;
+        document.getElementById('selected-size-info').classList.add('hidden');
+        
+        loadProfileSizes();
+      }
+      
+      document.getElementById('calcResults').innerHTML = `
+        <div class="text-center" style="padding: 40px 20px; color: var(--nzsk-gray-dark);">
+          <i class="fas fa-calculator" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+          <div style="font-size: 16px; font-weight: 600;">Введите параметры для расчета</div>
+          <div style="font-size: 14px; margin-top: 10px;">Нажмите "Рассчитать расход" для получения результатов</div>
+        </div>
+      `;
+      
+      document.getElementById('calcResultStatus').textContent = 'Ожидание расчета';
+      document.getElementById('calcResultStatus').className = 'status-badge status-info';
+      
+      document.getElementById('detailedCalculation').classList.add('hidden');
+      document.getElementById('packingInfo').classList.add('hidden');
+      document.getElementById('technicalInfo').classList.add('hidden');
+      
+      showNotification('Калькулятор очищен', 'success');
+    }
 
     // ========== ФУНКЦИИ ДЛЯ ПРОВЕРКИ УСЛОВИЙ ==========
     function updateProductOptions() {
@@ -3308,7 +3256,7 @@ function clearCalculator() {
       
       if (tabName === 'calculator') {
         if (currentCalcTab === 'manual') {
-          updateCalculatedAreaInfo();
+          updateAreaFromLength();
         }
       }
       
