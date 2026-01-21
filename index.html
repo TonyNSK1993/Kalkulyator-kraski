@@ -1180,39 +1180,18 @@
                   <input type="number" id="ptm" class="form-control" value="5.8" min="1.0" max="18.0" step="0.1">
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-ruler-vertical"></i>
-                    Длина конструкций, м
-                  </label>
-                  <input type="number" id="length" class="form-control" value="10" min="0.1" step="0.1">
-                  <div class="hint-box mt-10">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>ВНИМАНИЕ:</strong> Площадь всегда равна длине (S = L)
-                  </div>
-                </div>
-
+                <!-- Убрано поле "Длина конструкций" -->
+                
                 <div class="form-group">
                   <label class="form-label">
                     <i class="fas fa-ruler-combined"></i>
-                    Площадь поверхности, м² (ОПЦИОНАЛЬНО)
+                    Площадь поверхности, м²
                   </label>
-                  <input type="number" id="area" class="form-control" placeholder="Введите площадь, если отличается от длины">
+                  <input type="number" id="area" class="form-control" value="120" min="0.1" step="0.1">
                   <div class="hint-box mt-10">
                     <i class="fas fa-info-circle"></i>
-                    Если оставить пустым, площадь будет равна длине
-                    <div id="calculatedAreaInfo" class="mt-10 hidden">
-                      <i class="fas fa-calculator"></i>
-                      <span>Используемая площадь: <span id="calculatedAreaValue">0</span> м² (S = L)</span>
-                    </div>
+                    <strong>ВНИМАНИЕ:</strong> Введите общую площадь поверхности для расчета
                   </div>
-                </div>
-                
-                <!-- Кнопка для расчета площади -->
-                <div class="form-group mt-20">
-                  <button class="btn btn-outline" onclick="updateAreaFromLength()" style="width: 100%;">
-                    <i class="fas fa-sync-alt"></i>Рассчитать площадь из длины
-                  </button>
                 </div>
               </div>
 
@@ -1256,21 +1235,13 @@
                   <div><strong>Площадь на 1 м длины:</strong> <span id="selected-size-areaPerMeter"></span> м²/м.п.</div>
                 </div>
 
-                <!-- РУЧНОЙ ВВОД ТОЛЬКО ДЛИНЫ -->
-                <div class="hint-box mt-20">
-                  <i class="fas fa-edit"></i>
-                  <strong>Ввод длины профиля</strong>
-                  <div style="margin-top: 10px; font-size: 13px;">
-                    Введите длину профиля. Площадь будет равна длине (S = L).
-                  </div>
-                </div>
-
+                <!-- ВВОД ПЛОЩАДИ ПОВЕРХНОСТИ -->
                 <div class="form-group">
                   <label class="form-label">
-                    <i class="fas fa-ruler-vertical"></i>
-                    Длина профиля, м
+                    <i class="fas fa-ruler-combined"></i>
+                    Площадь поверхности, м²
                   </label>
-                  <input type="number" id="profile-length" class="form-control" value="10" min="0.1" step="0.1">
+                  <input type="number" id="profile-area" class="form-control" value="120" min="0.1" step="0.1">
                 </div>
 
                 <div class="hint-box">
@@ -1364,7 +1335,6 @@
               <div><b>Спец-ВМ:</b> Плотность 1.65 г/см³, расход = толщина × 1.65 кг/м², фасовка - ведра по 25 кг</div>
               <div><b>Спец-Конструктив:</b> Плотность 1.35 г/см³, расход = толщина × 1.35 кг/м², фасовка - ведра по 18 кг</div>
               <div><b>Конструктив-Металл:</b> Комбинированная система: Спец-Конструктив (18 кг/ведро) + Спец-ВМ (25 кг/ведро)</div>
-              <div><b>Расчет площади:</b> Площадь всегда равна длине (S = L)</div>
             </div>
           </div>
         </div>
@@ -1671,7 +1641,7 @@
 
           <div class="hint-box">
             <i class="fas fa-clock"></i> 
-            Время сушки зависит от температуры и влажности. При низких температурах время увеличивается.
+            Время сушки зависит от температура и влажности. При низких температурах время увеличивается.
           </div>
         </div>
       </div>
@@ -2474,58 +2444,10 @@
       initProfileButtons();
       loadProfileSizes();
       updateProductOptions();
-      
-      // Добавляем обработчики для автоматического расчета площади
-      document.getElementById('length').addEventListener('input', function() {
-        if (currentCalcTab === 'manual') {
-          updateAreaFromLength();
-        }
-      });
-      
-      // Инициализируем отображение расчетной площади
-      updateAreaFromLength();
     });
 
     // ========== ФУНКЦИИ ДЛЯ КАЛЬКУЛЯТОРА РАСХОДА ==========
     
-    // Функция для расчета площади из длины
-    function updateAreaFromLength() {
-      if (currentCalcTab !== 'manual') return;
-      
-      const length = parseFloat(document.getElementById('length').value);
-      
-      if (!length || length <= 0) {
-        document.getElementById('calculatedAreaInfo').classList.add('hidden');
-        return;
-      }
-      
-      // Площадь равна длине (S = L)
-      document.getElementById('calculatedAreaValue').textContent = length.toFixed(2);
-      document.getElementById('calculatedAreaInfo').classList.remove('hidden');
-      
-      // Если площадь введена вручную, сравниваем с длиной
-      const areaInput = document.getElementById('area').value;
-      if (areaInput) {
-        const manualArea = parseFloat(areaInput);
-        const diff = Math.abs(length - manualArea);
-        const diffPercent = (diff / length * 100).toFixed(1);
-        
-        if (diffPercent > 10) {
-          document.getElementById('calculatedAreaInfo').innerHTML = 
-            `<i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
-            <span>Используемая площадь: ${length.toFixed(2)} м² (S = L) (отличается на ${diffPercent}% от введенной площади)</span>`;
-        } else {
-          document.getElementById('calculatedAreaInfo').innerHTML = 
-            `<i class="fas fa-check-circle" style="color: var(--success);"></i>
-            <span>Используемая площадь: ${length.toFixed(2)} м² (S = L) (совпадает с введенной площадью)</span>`;
-        }
-      } else {
-        document.getElementById('calculatedAreaInfo').innerHTML = 
-          `<i class="fas fa-info-circle" style="color: var(--info);"></i>
-          <span>Используемая площадь: ${length.toFixed(2)} м² (S = L)</span>`;
-      }
-    }
-
     function switchCalcTab(tabName) {
       currentCalcTab = tabName;
       
@@ -2542,8 +2464,6 @@
       
       if (tabName === 'profiles') {
         loadProfileSizes();
-      } else if (tabName === 'manual') {
-        updateAreaFromLength();
       }
     }
 
@@ -2636,39 +2556,20 @@
     }
 
     function calculateMaterial() {
-      let ptm, totalArea, length;
+      let ptm, totalArea;
       
       if (currentCalcTab === 'manual') {
         ptm = parseFloat(document.getElementById('ptm').value);
-        length = parseFloat(document.getElementById('length').value);
+        totalArea = parseFloat(document.getElementById('area').value);
         
         if (!ptm || ptm < 1.0 || ptm > 18.0) {
           showNotification('Введите корректную ПТМ (1.0-18.0 мм)', 'error');
           return;
         }
         
-        if (!length || length <= 0) {
-          showNotification('Введите длину конструкций', 'error');
+        if (!totalArea || totalArea <= 0) {
+          showNotification('Введите площадь поверхности', 'error');
           return;
-        }
-        
-        // ВАЖНОЕ ИЗМЕНЕНИЕ: Площадь всегда равна длине (S = L)
-        totalArea = length;
-        
-        // Показываем предупреждение, если пользователь ввел площадь вручную
-        const inputArea = document.getElementById('area').value;
-        if (inputArea) {
-          const manualArea = parseFloat(inputArea);
-          const diff = Math.abs(totalArea - manualArea);
-          const diffPercent = (diff / totalArea * 100);
-          
-          if (diffPercent > 10) {
-            showNotification(`Внимание: Площадь рассчитана как длина (S = L = ${length} м). Введенная площадь (${manualArea} м²) проигнорирована.`, 'warning');
-          } else {
-            showNotification(`Площадь рассчитана как длина (S = L = ${length} м). Введенная площадь совпадает.`, 'success');
-          }
-        } else {
-          showNotification(`Площадь рассчитана как длина (S = L = ${length} м)`, 'success');
         }
       } 
       else if (currentCalcTab === 'profiles') {
@@ -2678,16 +2579,12 @@
         }
         
         ptm = currentProfileSize.ptm;
-        length = parseFloat(document.getElementById('profile-length').value);
+        totalArea = parseFloat(document.getElementById('profile-area').value);
         
-        if (!length || length <= 0) {
-          showNotification('Введите длину профиля', 'error');
+        if (!totalArea || totalArea <= 0) {
+          showNotification('Введите площадь поверхности', 'error');
           return;
         }
-        
-        // ВАЖНОЕ ИЗМЕНЕНИЕ: Для профилей тоже используем S = L
-        // Игнорируем areaPerMeter, используем только длину
-        totalArea = length;
       }
       
       if (!totalArea || totalArea <= 0) {
@@ -2760,9 +2657,8 @@
       
       displayResults({
         ptm: ptm,
-        length: length,
-        fireResistance: fireResistance,
         totalArea: totalArea.toFixed(2),
+        fireResistance: fireResistance,
         systemType: systemType,
         calculationData: calculationData,
         isSystem: isSystem,
@@ -2798,15 +2694,7 @@
             
             <div class="info-card">
               <div class="info-card-title">
-                <i class="fas fa-ruler-vertical"></i>Длина
-              </div>
-              <div class="info-card-value">${data.length}</div>
-              <div class="info-card-unit">м</div>
-            </div>
-            
-            <div class="info-card">
-              <div class="info-card-title">
-                <i class="fas fa-ruler-combined"></i>Площадь (S = L)
+                <i class="fas fa-ruler-combined"></i>Площадь
               </div>
               <div class="info-card-value">${data.totalArea}</div>
               <div class="info-card-unit">м²</div>
@@ -2832,7 +2720,7 @@
           <div class="mt-15">
             <div><b>Общий расход материала:</b> ${data.totalKg} кг</div>
             <div><b>Расход на 1 м²:</b> ${data.totalConsumption.toFixed(2)} кг/м²</div>
-            <div><b>Принцип расчета:</b> Площадь = Длина (S = L = ${data.length} м)</div>
+            <div><b>Площадь поверхности:</b> ${data.totalArea} м²</div>
           </div>
         </div>
       `;
@@ -2908,9 +2796,6 @@
                 <div class="info-card-value">${data.calculationData.consumption.toFixed(2)}</div>
                 <div class="info-card-unit">кг/м²</div>
               </div>
-            </div>
-            <div class="mt-10">
-              <i class="fas fa-info-circle"></i> <small>Расчет выполнен по принципу: Площадь = Длина (S = L = ${data.length} м)</small>
             </div>
           </div>
         `;
@@ -2991,7 +2876,7 @@
             <div><b>Температура нанесения:</b> +5...+40°C</div>
             <div><b>Влажность воздуха:</b> не более 80%</div>
             <div><b>Межслойная сушка:</b> 24 часа при 20°C</div>
-            <div><b>Принцип расчета:</b> Площадь = Длина (S = L = ${data.length} м)</div>
+            <div><b>Площадь поверхности:</b> ${data.totalArea} м²</div>
           </div>
           
           <div class="mt-10" style="font-size: 13px; color: var(--nzsk-gray-dark);">
@@ -3020,11 +2905,9 @@
     function clearCalculator() {
       if (currentCalcTab === 'manual') {
         document.getElementById('ptm').value = '5.8';
-        document.getElementById('length').value = '10';
-        document.getElementById('area').value = '';
-        document.getElementById('calculatedAreaInfo').classList.add('hidden');
+        document.getElementById('area').value = '120';
       } else if (currentCalcTab === 'profiles') {
-        document.getElementById('profile-length').value = '10';
+        document.getElementById('profile-area').value = '120';
         
         document.querySelectorAll('.profile-type-btn').forEach(btn => {
           btn.classList.remove('active');
@@ -3255,12 +3138,6 @@
       
       if (tabName === 'check') {
         updateProductOptions();
-      }
-      
-      if (tabName === 'calculator') {
-        if (currentCalcTab === 'manual') {
-          updateAreaFromLength();
-        }
       }
       
       closeAllDropdowns();
